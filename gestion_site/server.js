@@ -72,7 +72,7 @@ app.use(
 
 const mainSitePath = path.join(
     __dirname,
-    '../main_site/front-end'
+    '../html/main_site/front-end'
 );
 
 app.use(
