@@ -22,7 +22,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
     if (data.role === "admin") {
 
-        window.location.href = "admin-dashboard.html";
+        window.location.href = "html/admin-dashboard.html";
 
     } else if (data.role === "utilisateur") {
 
