@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un contenu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="topbar">
+            <div class="brand">
+                <div class="image-container">
+                    <img src="ziguade-tour-logo.jpeg" alt="Logo Ziguade Tour" class="logo">
+
+                </div>
+                <div>
+                    <p class="eyebrow">Ziguade Tour</p>
+                    <h1>Créer un nouveau contenu</h1>
+                </div>
+            </div>
+            <a href="#" class="ghost-link">Retour</a>
+        </header>
+
+        <main class="content-grid">
+            <section class="card form-card">
+                <div class="card-head">
+                    <div>
+                        <p class="eyebrow">Diffusion</p>
+                        <h2>Envoyer un template à vos clients</h2>
+                    </div>
+                </div>
+
+                <form id="contentForm">
+                    <div class="field">
+                        <label for="startId">ID de départ</label>
+                        <input type="number" id="startId" min="1" value="1">
+                    </div>
+
+                    <div class="field">
+                        <label for="limit">Nombre de clients</label>
+                        <input type="number" id="limit" min="1" value="100">
+                    </div>
+
+                    <div class="field">
+                        <label for="endId">Dernier ID</label>
+                        <input type="number" id="endId" readonly>
+                    </div>
+
+                    <label class="field">
+                        <span>Nom du template</span>
+                        <select id="templateName" name="templateName" required>
+                            <option value="">Chargement des templates...</option>
+                        </select>
+                        <small>Seuls les templates approuvés par Meta sont affichés.</small>
+                    </label>
+
+                    <label class="field upload-card" id="templateMediaField" style="display: none;">
+                        <span id="templateMediaLabel">Joindre un fichier</span>
+                        <input type="file" id="templateMediaFile" name="templateMediaFile">
+                        <small id="templateMediaHint">Ce template nécessite un fichier en en-tête.</small>
+                    </label>
+
+                    <div id="preview" class="preview-grid"></div>
+
+                    <button type="submit">Publier</button>
+                </form>
+            </section>
+
+            <aside class="card preview-card">
+                <div class="card-head">
+                    <div>
+                        <p class="eyebrow">Aperçu</p>
+                        <h2>Votre publication</h2>
+                    </div>
+                </div>
+
+                <div class="preview-box">
+                    <p id="previewTemplateName">Template : —</p>
+                    <p id="previewText">Le contenu sera rempli à partir du template approuvé.</p>
+                    <div id="previewMedia" class="preview-media"></div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

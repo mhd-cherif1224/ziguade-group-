@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace utilisateur</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/user-workspace.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-logo" onclick="window.location.href='user-dashboard.html'">
+            <img src="../images/logo.svg" alt="Logo AGORA">
+        </div>
+
+        <nav class="navbar-links">
+            <a href="user-dashboard.html" class="nav-link active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                Tableau de bord
+            </a>
+            <a href="#composer" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                Nouveau message
+            </a>
+            <a href="#messages" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Mes messages
+            </a>
+        </nav>
+
+        <div class="navbar-right">
+            <a href="login-user.html" class="btn-logout">Déconnexion</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero-card">
+            <div>
+                <p class="eyebrow">Espace utilisateur</p>
+                <h1>Créez, classez et envoyez vos messages</h1>
+                <p class="hero-copy">Vous êtes responsable de la création des messages et de leur répartition par catégorie. Les administrateurs gèrent quant à eux les comptes utilisateurs.</p>
+            </div>
+            <a href="#composer" class="action-chip">Composer un message</a>
+        </section>
+
+        <section class="stats-grid">
+            <article class="stat-card">
+                <div class="stat-icon purple">✉️</div>
+                <div>
+                    <strong>24</strong>
+                    <span>Messages ce mois</span>
+                </div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-icon teal">🏷️</div>
+                <div>
+                    <strong>6</strong>
+                    <span>Catégories actives</span>
+                </div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-icon coral">📎</div>
+                <div>
+                    <strong>11</strong>
+                    <span>Pièces jointes</span>
+                </div>
+            </article>
+        </section>
+
+        <section class="workspace-grid">
+            <article class="workspace-card composer-card" id="composer">
+                <div class="card-header">
+                    <div>
+                        <p class="eyebrow">Nouveau message</p>
+                        <h2>Rédiger une campagne</h2>
+                    </div>
+                </div>
+
+                <form class="composer-form">
+                    <div class="form-grid">
+                        <label class="field">
+                            <span>Destinataire</span>
+                            <input type="text" placeholder="Nom ou groupe">
+                        </label>
+                        <label class="field">
+                            <span>Sujet</span>
+                            <input type="text" placeholder="Objet du message">
+                        </label>
+                    </div>
+
+                    <div class="form-grid">
+                        <label class="field">
+                            <span>Catégorie</span>
+                            <select>
+                                <option>Campagne promotionnelle</option>
+                                <option>Support client</option>
+                                <option>Rappel</option>
+                                <option>Offre spéciale</option>
+                            </select>
+                        </label>
+                        <label class="field">
+                            <span>Pièce jointe</span>
+                            <input type="file">
+                        </label>
+                    </div>
+
+                    <label class="field">
+                        <span>Message</span>
+                        <textarea rows="6" placeholder="Rédigez votre message ici..."></textarea>
+                    </label>
+
+                    <div class="form-actions">
+                        <button type="submit">Envoyer le message</button>
+                        <span class="helper-text">Le message apparaîtra dans votre historique une fois envoyé.</span>
+                    </div>
+                </form>
+            </article>
+
+            <article class="workspace-card" id="messages">
+                <div class="card-header">
+                    <div>
+                        <p class="eyebrow">Historique</p>
+                        <h2>Messages récents</h2>
+                    </div>
+                </div>
+
+                <div class="table-shell">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sujet</th>
+                                <th>Catégorie</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Réservation urgente</td>
+                                <td><span class="chip">Promotion</span></td>
+                                <td><span class="status-badge status-sent">Envoyé</span></td>
+                            </tr>
+                            <tr>
+                                <td>Suivi de paiement</td>
+                                <td><span class="chip">Support</span></td>
+                                <td><span class="status-badge status-draft">Brouillon</span></td>
+                            </tr>
+                            <tr>
+                                <td>Offre de lancement</td>
+                                <td><span class="chip">Campagne</span></td>
+                                <td><span class="status-badge status-sent">Envoyé</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

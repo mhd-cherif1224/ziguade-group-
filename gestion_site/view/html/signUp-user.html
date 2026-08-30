@@ -1,0 +1,98 @@
+<!-- Sign-up User -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/signup-user.css">
+    <title>Sign-up User</title>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- NOTIFICATION -->
+        <div id="notification"></div>
+
+        <!-- LEFT -->
+        <div class="left">
+
+            <div class="nav-logo">
+                <img src="../images/logo.svg" width="100px" alt="Logo">
+            </div>
+
+
+            <h1>Bienvenue</h1>
+            <p>Inscrivez-vous pour continuer</p>
+
+            <form>
+
+                <div class="input-group">
+                    <i class="fa-solid fa-envelope icon-left"></i>
+                    <input type="email" placeholder="Entrez votre email" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fa-solid fa-lock icon-left"></i>
+                    <input type="password" placeholder="Entrez votre mot de passe" id="password1" required>
+                    <i class="fa-solid fa-eye-slash icon-right" id="togglePassword1"></i>
+                </div>
+
+                <div class="input-group">
+                    <i class="fa-solid fa-lock icon-left"></i>
+                    <input type="password" placeholder="Confirmez votre mot de passe" id="password2" required>
+                    <i class="fa-solid fa-eye-slash icon-right" id="togglePassword2"></i>
+                </div>
+
+                <div class="options">
+                    <label>
+                        <!-- BUG CORRIGÉ : ajout de id="check" (manquant dans l'original) -->
+                        <input type="checkbox" id="check"> remember me
+                    </label>
+                </div>
+
+                <div class="field">
+                    <!-- Strength bar -->
+                    <div class="strength-wrap">
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strengthFill"></div>
+                        </div>
+                        <div class="strength-label" id="strengthLabel"></div>
+                    </div>
+
+                    <!-- Requirements -->
+                    <div class="reqs">
+                        <div class="req" id="req-len"><div class="dot"></div>Au moins 8 caractères</div>
+                        <div class="req" id="req-up"> <div class="dot"></div>Une lettre majuscule</div>
+                        <div class="req" id="req-num"><div class="dot"></div>Un chiffre</div>
+                        <div class="req" id="req-sym"><div class="dot"></div>Un caractère spécial (!@#$…)</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">S'inscrire</button>
+
+            </form>
+
+            <footer>
+                <p class="bottom-text" id="bottom-text">
+                    Vous avez un compte? <a href="../html/login-user.html">Connectez-vous!</a>
+                </p>
+            </footer>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="right">
+            <h2>Gérez tous vos services</h2>
+            <span>en un seul endroit.</span>
+            <div class="picture-container">
+                <img src="../images/USER3.png" alt="User-picture">
+            </div>
+        </div>
+
+    </div>
+
+    <script src="../js/signUp-user.js"></script>
+
+</body>
+</html>

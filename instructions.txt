@@ -1,0 +1,18 @@
+1. Creating the developer app — instant, free
+You go to developers.facebook.com, create a Business-type app, and add the WhatsApp product. You immediately get a test phone number, a WhatsApp Business Account ID, and access to the WhatsApp Manager panel — no waiting, no cost. WhatsApp
+2. Testing — works right away
+Meta gives you a pre-approved "hello_world" template so you don't need to create custom templates for your first test — you can send test messages within minutes. WhatsApp
+3. Business Verification — free, but takes time
+To lift the limits, you need Meta Business Verification: uploading official documentation (tax ID, incorporation documents, utility bill) and waiting 2 to 10 business days for approval. No fee, just document review. WhatsApp
+Without this verification, you'll be limited to 250 conversations in 24 hours. WhatsApp
+4. Template approval — free, per-template review
+Every custom message format (like your bulk broadcast text) needs to be submitted for approval before use — free, but each one goes through Meta's review. Memorly
+5. Display name approval — free
+Your business's shown name on WhatsApp also needs approval, and can get rejected if it doesn't match your legal business documents.
+What actually causes delays (not cost, but friction)
+The most common holdup isn't money — it's document consistency. Approval issues usually stem from mismatches like the legal name on the document not matching the brand name, the website showing one name while Meta Business Suite has another, or a display name getting rejected without a clear reason. Blueticks
+Realistic timelines vary — some sources cite 2 to 10 business days for verification, while others estimate the full process at 1-6 weeks based on complete verification depending on how clean your documents are. WhatsApp
+Do you need a business entity?
+This is the important catch for your project — Meta Business Verification generally expects a real registered business (tax ID, incorporation documents). If you're doing this as a personal/student project without a registered business, this could be a blocker — you may want to use a BSP like Twilio instead, since they can sometimes simplify or bundle parts of this onboarding, though you'd still ultimately go through Meta's verification for full-scale messaging.
+Bottom line
+StepCostTimeCreate developer appFreeInstantTest with sandbox numberFreeInstantBusiness Verification (docs)FreeDays to weeksTemplate approvalFreeHours to daysDisplay name approvalFreeVaries

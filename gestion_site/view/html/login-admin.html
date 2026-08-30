@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ICONS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/login-user.css">
+
+    <title>Login Admin</title>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Notification -->
+    <div id="notification"></div>
+
+    <!-- LEFT -->
+    <div class="left">
+
+        <div class="nav-logo">
+            <img src="../images/ziguade-tour-logo.jpeg" width="100%" alt="logo">
+        </div>
+
+        <h1>Bienvenue
+        <p>Connectez-vous pour accéder</p>
+
+        <form id="loginForm">
+
+            <!-- USERNAME -->
+            <div class="input-group">
+                <i class="fa-solid fa-user icon-left"></i>
+
+                <input
+                    type="text"
+                    name="username"
+                    id="in-username"
+                    placeholder="Entrez votre nom d'utilisateur"
+                    required
+                >
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="input-group">
+
+                <i class="fa-solid fa-lock icon-left"></i>
+
+                <input
+                    type="password"
+                    name="password"
+                    id="password"
+                    placeholder="Entrez votre mot de passe"
+                    required
+                >
+
+                <i class="fa-solid fa-eye-slash icon-right" id="togglePassword"></i>
+
+            </div>
+
+            <!-- OPTIONS -->
+            <div class="options">
+
+                <label>
+                    <input type="checkbox" id="checkbox">
+                    Remember me
+                </label>
+
+            </div>
+
+            <!-- BUTTON -->
+            <button type="submit">
+                Se connecter
+            </button>
+
+        </form>
+<footer>
+    
+</footer>
+    </div>
+
+    <!-- RIGHT -->
+        
+
+</div>
+
+<script src="../js/login-admin.js"></script>
+
+</body>
+</html>

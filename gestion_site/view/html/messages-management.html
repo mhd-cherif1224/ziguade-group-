@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des messages</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/admin-management.css">
+
+    <style>
+        .modal-content-wide {
+            position: relative;
+        }
+
+        .status-modal-stats {
+            position: absolute;
+            top: 16px;
+            right: 60px;
+            display: flex;
+            gap: 8px;
+            z-index: 1;
+        }
+
+        .status-modal-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 46px;
+            padding: 6px 8px 5px;
+            border-radius: 12px;
+            background: var(--gray-50);
+            border: 1px solid var(--border);
+        }
+
+        .status-modal-stat-value {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.1;
+            color: var(--gray-900);
+        }
+
+        .status-modal-stat-label {
+            margin-top: 3px;
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--gray-400);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .status-modal-stat.sent {
+            background: var(--purple-50);
+            border-color: var(--purple-100);
+        }
+
+        .status-modal-stat.sent .status-modal-stat-value {
+            color: var(--purple-800);
+        }
+
+        .status-modal-stat.delivered {
+            background: #eaf8f1;
+            border-color: #cdeee0;
+        }
+
+        .status-modal-stat.delivered .status-modal-stat-value {
+            color: var(--teal-400);
+        }
+
+        .status-modal-stat.read {
+            background: #eaf3ff;
+            border-color: #d3e6ff;
+        }
+
+        .status-modal-stat.read .status-modal-stat-value {
+            color: var(--purple-600);
+        }
+
+        .status-modal-stat.failed {
+            background: #fdecec;
+            border-color: #f7d5d3;
+        }
+
+        .status-modal-stat.failed .status-modal-stat-value {
+            color: var(--coral-400);
+        }
+
+        @media (max-width: 640px) {
+            .status-modal-stats {
+                position: static;
+                justify-content: flex-end;
+                margin: 0 0 12px;
+                flex-wrap: wrap;
+            }
+        }
+
+        .message-row {
+            cursor: context-menu;
+        }
+
+        .message-context-menu {
+            position: fixed;
+            z-index: 10000;
+            width: 190px;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 10px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.16);
+            padding: 5px;
+        }
+
+        .message-context-menu button {
+            display: block;
+            width: 100%;
+            border: 0;
+            background: transparent;
+            text-align: left;
+            padding: 11px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        .message-context-menu button:hover {
+            background: #f1f3f5;
+        }
+
+        .conversation-view {
+            position: fixed;
+            inset: 0;
+            z-index: 9000;
+            display: none;
+            background: #f0f2f5;
+        }
+
+        .conversation-view.show {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .conversation-header {
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 24px;
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .conversation-back {
+            width: 40px;
+            height: 40px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            font-size: 25px;
+            cursor: pointer;
+        }
+
+        .conversation-back:hover {
+            background: #f1f3f5;
+        }
+
+        .conversation-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: #e9ecef;
+            font-weight: 600;
+        }
+
+        .conversation-user {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .conversation-user h2 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .conversation-user p {
+            margin: 3px 0 0;
+            color: #777;
+            font-size: 12px;
+        }
+
+        .conversation-window {
+            min-width: 190px;
+            text-align: right;
+        }
+
+        .conversation-timer {
+            font-size: 18px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .conversation-window-status {
+            margin-top: 3px;
+            font-size: 11px;
+        }
+
+        .conversation-window-status.active {
+            color: #198754;
+        }
+
+        .conversation-window-status.expired {
+            color: #dc3545;
+        }
+
+        .conversation-window-status.unknown {
+            color: #777;
+        }
+
+        .conversation-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px max(20px, calc((100vw - 850px) / 2));
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,.75), transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(255,255,255,.65), transparent 30%),
+                #efeae2;
+        }
+
+        .conversation-message {
+            display: flex;
+            width: 100%;
+        }
+
+        .conversation-message.sent {
+            justify-content: flex-end;
+        }
+
+        .conversation-message.received {
+            justify-content: flex-start;
+        }
+
+        .conversation-bubble {
+            max-width: min(70%, 560px);
+            padding: 8px 10px 6px;
+            border-radius: 9px;
+            box-shadow: 0 1px 1px rgba(0,0,0,.08);
+        }
+
+        .conversation-message.sent .conversation-bubble {
+            background: #d9fdd3;
+            border-top-right-radius: 3px;
+        }
+
+        .conversation-message.received .conversation-bubble {
+            background: #fff;
+            border-top-left-radius: 3px;
+        }
+
+        .conversation-text {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        .conversation-time {
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 2px;
+            color: #667781;
+            font-size: 10px;
+        }
+
+        .conversation-empty,
+        .conversation-loading,
+        .conversation-error {
+            margin: auto;
+            padding: 14px 18px;
+            border-radius: 10px;
+            background: rgba(255,255,255,.9);
+            color: #667781;
+            font-size: 13px;
+        }
+
+        .conversation-error {
+            color: #dc3545;
+        }
+
+        .conversation-composer {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            padding: 12px max(20px, calc((100vw - 850px) / 2));
+            background: #fff;
+            border-top: 1px solid #ddd;
+        }
+
+        .conversation-composer.disabled {
+            opacity: 0.6;
+        }
+
+        .conversation-composer-text {
+            flex: 1;
+            resize: none;
+            max-height: 120px;
+            min-height: 42px;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font: inherit;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .conversation-composer-file-label {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: #f1f3f5;
+            cursor: pointer;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .conversation-composer-file-label:hover {
+            background: #e6e8eb;
+        }
+
+        .conversation-composer-file-input {
+            display: none;
+        }
+
+        .conversation-composer-send {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 0;
+            background: #198754;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+        }
+
+        .conversation-composer-send:disabled {
+            background: #a9a9a9;
+            cursor: not-allowed;
+        }
+
+        .conversation-composer-file-name {
+            font-size: 11px;
+            color: #667781;
+            padding: 0 max(20px, calc((100vw - 850px) / 2)) 8px;
+            background: #fff;
+        }
+
+        .conversation-composer-blocked {
+            text-align: center;
+            font-size: 12px;
+            color: #dc3545;
+            padding: 8px max(20px, calc((100vw - 850px) / 2)) 12px;
+            background: #fff;
+        }
+
+        @media (max-width: 700px) {
+            .conversation-composer,
+            .conversation-composer-file-name,
+            .conversation-composer-blocked {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .conversation-header {
+                padding: 10px 12px;
+            }
+
+            .conversation-window {
+                min-width: 125px;
+            }
+
+            .conversation-window-status {
+                max-width: 125px;
+            }
+
+            .conversation-bubble {
+                max-width: 82%;
+            }
+
+            .conversation-messages {
+                padding: 18px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-logo" onclick="window.location.href='admin-dashboard.html'">
+            <img src="../images/ziguade-tour-logo.jpeg" alt="Logo AGORA">
+        </div>
+
+        <nav class="navbar-links">
+            <a href="admins-management.html" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Gestion des admins
+            </a>
+            <a href="users-management.html" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Gestion des utilisateurs
+            </a>
+            <a href="messages-management.html" class="nav-link active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Gestion des Messages
+            </a>
+            <a href="categories-management.html" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Gestion des Catégories
+            </a>
+        </nav>
+
+        <div class="navbar-right">
+            <button id="toggleBtn" aria-label="Basculer le thème">🌙</button>
+            <a href="login-admin.html" class="btn-logout">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Déconnexion
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="page-header">
+            <div>
+                <p class="eyebrow">Messagerie</p>
+                <h1>Gestion des messages</h1>
+            </div>
+            <a class="action-chip" href="categories-management.html">Gérer les catégories</a>
+        </section>
+
+        <section class="table-shell">
+            <table>
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>type</th>
+                        <th>send_mode</th>
+                        <th>text</th>
+                        <th>caption</th>
+                        <th>file_path</th>
+                        <th>file_size</th>
+                        <th>mime_type</th>
+                        <th>date_envoie</th>
+                        <th>status</th>
+                    </tr>
+                </thead>
+                <tbody id="messagesBody"></tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- Existing "Know info" modal -->
+    <div class="modal" id="statusModal">
+        <div class="modal-content modal-content-wide">
+            <div class="modal-header">
+                <h2 id="statusModalTitle">Statut d'envoi</h2>
+                <button class="modal-close" id="statusModalClose" aria-label="Fermer">&times;</button>
+            </div>
+            <div class="status-modal-stats" id="statusModalStats">
+                <div class="status-modal-stat sent">
+                    <span class="status-modal-stat-value" id="statSent">0</span>
+                    <span class="status-modal-stat-label">Envoyés</span>
+                </div>
+                <div class="status-modal-stat delivered">
+                    <span class="status-modal-stat-value" id="statDelivered">0</span>
+                    <span class="status-modal-stat-label">Livrés</span>
+                </div>
+                <div class="status-modal-stat read">
+                    <span class="status-modal-stat-value" id="statRead">0</span>
+                    <span class="status-modal-stat-label">Lus</span>
+                </div>
+                <div class="status-modal-stat failed">
+                    <span class="status-modal-stat-value" id="statFailed">0</span>
+                    <span class="status-modal-stat-label">Échoués</span>
+                </div>
+            </div>
+            <div class="modal-body-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Client</th>
+                            <th>Téléphone</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statusModalBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp-like conversation UI -->
+    <section class="conversation-view" id="conversationView" aria-hidden="true">
+        <header class="conversation-header">
+            <button
+                class="conversation-back"
+                id="conversationClose"
+                type="button"
+                aria-label="Retour"
+            >
+                &larr;
+            </button>
+
+            <div class="conversation-avatar">C</div>
+
+            <div class="conversation-user">
+                <h2 id="conversationTitle">Conversation</h2>
+                <p id="conversationPhone"></p>
+            </div>
+
+            <div class="conversation-window">
+                <div class="conversation-timer" id="conversationTimer">--:--:--</div>
+                <div class="conversation-window-status unknown" id="conversationWindowStatus">
+                    Chargement...
+                </div>
+            </div>
+        </header>
+
+        <div class="conversation-messages" id="conversationMessages"></div>
+
+        <div class="conversation-composer-file-name" id="conversationFileName" style="display:none;"></div>
+
+        <form class="conversation-composer" id="conversationComposer">
+            <label class="conversation-composer-file-label" title="Joindre un fichier">
+                📎
+                <input
+                    type="file"
+                    class="conversation-composer-file-input"
+                    id="conversationFileInput"
+                    accept="image/png,image/jpeg,image/jpg,video/mp4,video/3gpp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                >
+            </label>
+
+            <textarea
+                class="conversation-composer-text"
+                id="conversationTextInput"
+                rows="1"
+                placeholder="Écrivez un message..."
+            ></textarea>
+
+            <button
+                type="submit"
+                class="conversation-composer-send"
+                id="conversationSendBtn"
+                aria-label="Envoyer"
+            >➤</button>
+        </form>
+
+        <div class="conversation-composer-blocked" id="conversationBlocked" style="display:none;">
+            La fenêtre de 24h est terminée — envoyez un template pour relancer la conversation.
+        </div>
+    </section>
+
+    <script src="../js/messages-management.js"></script>
+</body>
+</html>

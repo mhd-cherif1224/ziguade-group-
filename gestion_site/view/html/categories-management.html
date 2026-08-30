@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catégories des messages</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/admin-management.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-logo" onclick="window.location.href='admin-dashboard.html'">
+            <img src="../images/ziguade-tour-logo.jpeg" alt="Logo AGORA">
+        </div>
+
+        <nav class="navbar-links">
+            <a href="admins-management.html" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Gestion des admins
+            </a>
+            <a href="users-management.html" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Gestion des utilisateurs
+            </a>
+            <a href="messages-management.html" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Gestion des Messages
+            </a>
+            <a href="categories-management.html" class="nav-link active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Gestion des Catégories
+            </a>
+        </nav>
+
+        <div class="navbar-right">
+            <button id="toggleBtn" aria-label="Basculer le thème">🌙</button>
+            <a href="login-admin.html" class="btn-logout">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Déconnexion
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="page-header">
+            <div>
+                <p class="eyebrow">Organisation</p>
+                <h1>Catégories des messages</h1>
+            </div>
+            <a class="action-chip" href="messages-management.html">Voir les messages</a>
+        </section>
+
+        <section class="table-shell">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom de catégorie</th>
+                        <th>Description</th>
+                        <th>Messages associés</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        *a faire*
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>

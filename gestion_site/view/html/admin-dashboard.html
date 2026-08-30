@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta name="facebook-domain-verification" content="u1pxhx4i4m4p6sx66ikf1xx5y6zixs" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centre de gestion des campagnes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/home-page-admin.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-logo" onclick="window.location.href='admin-dashboard.html'">
+            <img src="../images/logo.svg" width="100px" alt="Logo AGORA">
+        </div>
+
+        <nav class="navbar-links">
+            <a href="admins-management.html" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Gestion des admins
+            </a>
+            <a href="users-management.html" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Gestion des utilisateurs
+            </a>
+            <a href="messages-management.html" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Gestion des messages
+            </a>
+            <a href="categories-management.html" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Catégories des messages
+            </a>
+        </nav>
+
+        <div class="navbar-right">
+            <button id="toggleBtn" aria-label="Basculer le thème">🌙</button>
+            <a href="login-admin.html" class="btn-logout" id="logout-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Déconnexion
+            </a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-text">
+            <div class="hero-badge"><span></span> Centre de gestion</div>
+            <h1 class="hero-title">Gérez vos clients,<br>messages et catégories<br><span class="hero-title-accent">en un seul endroit</span></h1>
+            <p class="hero-name" id="userName">Bonjour, Administrateur</p>
+            <div class="hero-quote" id="welcomeQuote">Organisez. Triez. Diffusez.<br>نظّم. رتب. أرسل</div>
+            <p class="hero-sub">Centralisez les comptes, les messages, les pièces jointes et les catégories pour votre envoi de masse quotidien.</p>
+        </div>
+        <div class="hero-img-wrapper">
+            <img src="../images/ziguade-tour-logo.jpeg" alt="Tableau de bord de gestion" />
+        </div>
+    </section>
+
+    <section class="stats-section">
+        <div class="stats-grid">
+            <a class="stat-card" href="admins-management.html">
+                <div class="stat-icon purple">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" id="stat-admins">—</div>
+                    <div class="stat-label">Administrateurs</div>
+                    <span class="stat-badge purple">Comptes</span>
+                </div>
+            </a>
+            <a class="stat-card" href="users-management.html">
+                <div class="stat-icon teal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" id="stat-users">—</div>
+                    <div class="stat-label">Utilisateurs</div>
+                    <span class="stat-badge teal">Clients</span>
+                </div>
+            </a>
+            <a class="stat-card" href="messages-management.html">
+                <div class="stat-icon amber">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" id="stat-messages">—</div>
+                    <div class="stat-label">Messages</div>
+                    <span class="stat-badge amber">Envoyés</span>
+                </div>
+            </a>
+            <a class="stat-card" href="categories-management.html">
+                <div class="stat-icon coral">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" id="stat-categories">—</div>
+                    <div class="stat-label">Catégories</div>
+                    <span class="stat-badge coral">À trier</span>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <div class="footer-msg">
+        <div class="footer-msg-inner">
+            <div class="footer-msg-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </div>
+            <div class="footer-msg-text">
+                <strong>Votre centre d’envoi de masse</strong>
+                <span>Organisez les conversations, les images et les catégories sans perdre de vue vos objectifs.</span>
+            </div>
+        </div>
+    </div>
+
+    
+    <script src="../js/admin-dashboard.js"></script>
+    <script src="../js/dashboard-auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/login-user.css">
+    <title>Login User</title>
+</head>
+<body>
+
+    <div class="container">
+        <div id="notification"></div>
+
+        <!-- LEFT -->
+        <div class="left">
+
+            <div class="nav-logo">
+                <img src="../images/logo.svg" width="100px" alt="Logo">
+            </div>
+
+            <h1>Bienvenue</h1>
+            <p>Connecter-vous pour continuer</p>
+
+            <form>
+
+                <div class="input-group">
+                    <i class="fa-solid fa-envelope icon-left"></i>
+                    <input type="email" name="email" placeholder="entrez votre email" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fa-solid fa-lock icon-left"></i>
+                    <input type="password" name="password" id="passwordInput" placeholder="entrez votre mot de passe" required>
+                    <i class="fa-solid fa-eye-slash icon-right" id="togglePassword"></i>
+                </div>
+
+                <div class="options">
+                    <label>
+                        <input type="checkbox" id="check"> remember me
+                    </label>
+                    <a href="send-code.html" class="forgot-link">forgot password?</a>
+                </div>
+
+
+                <button type="submit" onclick="event.preventDefault(); window.location.href='user-dashboard.html'">Se connecter</button>
+
+            </form>
+
+            <footer>
+                <p class="bottom-text" id="bottom-text">
+                    Vous n'avez pas de compte? <a href="../html/signUp-user.html">inscrivez-vous!</a>
+                </p>
+            </footer>
+
+        </div>
+
+        <!-- RIGHT -->
+        <div class="right">
+            <h2>Gérez tous vos services</h2>
+            <span>en un seul endroit.</span>
+            <div class="picture-container">
+                <img src="../images/Frame-20476 (1).svg" alt="User-picture">
+            </div>
+        </div>
+
+    </div>
+
+    <script src="../js/login-user.js"></script>
+
+</body>
+</html>
