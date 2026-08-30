@@ -1,1 +1,1 @@
-half way there, i need to connect the main to gestion in a user interface, and add the buttons for the admin for him to add, change and delete a user, then add an authentification
+half way there, i need to connect the main to gestion in a user interface, and add the buttons for the admin for him to add, change and delete a user, then add an authentification .
