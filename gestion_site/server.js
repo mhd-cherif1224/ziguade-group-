@@ -72,7 +72,7 @@ app.use(
 
 const mainSitePath = path.join(
     __dirname,
-    '../html/main_site/front-end'
+    '../main_site/front-end'
 );
 
 app.use(
@@ -81,8 +81,6 @@ app.use(
 );
 
 console.log('Main site path:', mainSitePath);
-
-
 // =========================
 // GET /api/me
 // =========================
