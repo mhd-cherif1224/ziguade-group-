@@ -130,7 +130,7 @@ app.get('/', requirePageAuth, (req, res) => {
             __dirname,
             'view',
             'html',
-            'admin-dashboard.html'
+            'login-admin.html'
         )
     );
 
