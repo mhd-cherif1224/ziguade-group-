@@ -26,7 +26,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
     } else if (data.role === "utilisateur") {
 
-        window.location.href = "/main/index.html ";
+        window.location.href = "../../../main_site/front-end/index.html ";
 
     } else {
 
