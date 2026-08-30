@@ -2,8 +2,8 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
-require("./cron/messageAlarm");
 
+require("./cron/messageAlarm");
 
 const apiRouter = require('./model/api.js');
 const apiAdminRouter = require('./model/api-admin');
@@ -13,60 +13,140 @@ const apiAuthRouter = require('./model/api-auth');
 const apiClientRouter = require('./model/api-client');
 const webhookRouter = require('./model/webhook');
 
-
-
 const authenticateToken = require('./Controller/auth-middleware');
 
 const app = express();
 const PORT = 3001;
 
+
+// =========================
+// Middleware
+// =========================
+
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'view')));
+
+
+// =========================
+// Static files
+// gestion_site/view/
+// =========================
+
+app.use(
+    express.static(
+        path.join(__dirname, 'view')
+    )
+);
+
+
+// =========================
+// API
+// =========================
 
 app.use('/api', apiAuthRouter);
 app.use('/api', apiRouter);
 app.use('/api', apiAdminRouter);
 app.use('/api', apiUtilisateurRouter);
 app.use('/api', apidashboard);
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use('/api', apiClientRouter)
+app.use('/api', apiClientRouter);
 app.use('/api', webhookRouter);
-app.use("/main",express.static(path.join(__dirname, "../main_site/front-end")));
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
+// =========================
+// Uploads
+// gestion_site/uploads/
+// =========================
+
+app.use(
+    '/uploads',
+    express.static(
+        path.join(__dirname, 'uploads')
+    )
+);
 
 
-//);
-// GET /api/me — lets the frontend check "am I logged in?" and get admin info
+// =========================
+// Main website
+// main_site/front-end/
+// =========================
+
+const mainSitePath = path.join(
+    __dirname,
+    '../main_site/front-end'
+);
+
+app.use(
+    '/main',
+    express.static(mainSitePath)
+);
+
+console.log('Main site path:', mainSitePath);
+
+
+// =========================
+// GET /api/me
+// =========================
+
 app.get('/api/me', authenticateToken, (req, res) => {
-  res.json({ admin: req.user });
+    res.json({
+        admin: req.user
+    });
 });
 
-// Page guard: only serve the dashboard HTML if the token cookie is valid.
-// Otherwise, redirect to the login page instead of returning JSON.
+
+// =========================
+// Authentication
+// =========================
+
 function requirePageAuth(req, res, next) {
-  const token = req.cookies?.token;
 
-  if (!token) {
-    return res.redirect('/html/login-admin.html');
-  }
+    const token = req.cookies?.token;
 
-  jwt.verify(token, process.env.JWT_SECRET, (err) => {
-    if (err) {
-      return res.redirect('/html/login-admin.html');
+    if (!token) {
+        return res.redirect('/html/login-admin.html');
     }
-    next();
-  });
+
+    jwt.verify(
+        token,
+        process.env.JWT_SECRET,
+        (err) => {
+
+            if (err) {
+                return res.redirect('/html/login-admin.html');
+            }
+
+            next();
+        }
+    );
 }
 
+
+// =========================
+// Admin dashboard
+// =========================
+
 app.get('/', requirePageAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, 'view', 'html', 'admin-dashboard.html'));
+
+    res.sendFile(
+        path.join(
+            __dirname,
+            'view',
+            'html',
+            'admin-dashboard.html'
+        )
+    );
+
 });
+
+
+// =========================
+// Start server
+// =========================
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Gestion site server running at http://localhost:${PORT}`);
-});
 
-console.log(path.join(__dirname, "../main_site/front-end"));
+    console.log(
+        `Gestion site server running at http://localhost:${PORT}`
+    );
+
+});
