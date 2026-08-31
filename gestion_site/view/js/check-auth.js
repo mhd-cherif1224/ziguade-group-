@@ -25,7 +25,7 @@
       console.log('[check-auth] /api/me error body:', body);
       localStorage.removeItem('token');
       localStorage.removeItem('role');
-      window.location.href = '/html/login-admin.html';
+      window.location.href = '/html/admin-dashboard.html';
       return;
     }
  
@@ -33,6 +33,6 @@
     document.body.style.visibility = 'visible';
   } catch (err) {
     console.error('[check-auth] fetch failed:', err);
-    window.location.href = '/html/login-admin.html';
+    window.location.href = '/html/admin-dashboard.html';
   }
 })();
