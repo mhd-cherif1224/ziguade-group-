@@ -22,6 +22,10 @@ const PORT = 3001;
 
 app.use(express.json());
 app.use(cookieParser());
+
+app.get('/', requirePageAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'view', 'html', 'admin-dashboard.html'));
+});
 app.use(express.static(path.join(__dirname, 'view')));
 
 app.use('/api', apiAuthRouter);
@@ -61,9 +65,7 @@ function requirePageAuth(req, res, next) {
   });
 }
 
-app.get('/', requirePageAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, 'view', 'html', 'admin-dashboard.html'));
-});
+
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Gestion site server running at http://localhost:${PORT}`);

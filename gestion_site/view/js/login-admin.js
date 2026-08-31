@@ -21,18 +21,12 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     notification.className = 'success';
 
     if (data.role === "admin") {
-
-        window.location.href = "admin-dashboard.html";
-
+    window.location.href = "/html/admin-dashboard.html";
     } else if (data.role === "utilisateur") {
-
-        window.location.href = "main_site/front-end/index.html ";
-
+        window.location.href = "/main/index.html";
     } else {
-
         notification.textContent = "Rôle inconnu.";
         notification.className = "error";
-
     }
 
 } else {
