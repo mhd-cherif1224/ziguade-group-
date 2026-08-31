@@ -9,7 +9,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // required so the cookie gets sent/stored
       body: JSON.stringify({ username, password }),
     });
 
@@ -17,24 +16,35 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
     if (res.ok) {
 
-    notification.textContent = data.message;
-    notification.className = 'success';
+      notification.textContent = data.message;
+      notification.className = 'success';
 
-    if (data.role === "admin") {
-    window.location.href = "/html/admin-dashboard.html";
-    } else if (data.role === "utilisateur") {
-        window.location.href = "/main/index.html";
-    } else {
-        notification.textContent = "Rôle inconnu.";
-        notification.className = "error";
-    }
+      // Store the JWT client-side. Sent back as "Authorization: Bearer <token>"
+      // on every subsequent request instead of relying on a cookie.
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('role', data.role);
 
-} else {
+      if (data.role === "admin") {
 
-    notification.textContent = data.error || 'Erreur de connexion';
-    notification.className = 'error';
+          window.location.href = "/html/admin-dashboard.html";
 
-}
+      } else if (data.role === "utilisateur") {
+
+          window.location.href = "/main/index.html";
+
+      } else {
+
+          notification.textContent = "Rôle inconnu.";
+          notification.className = "error";
+
+      }
+
+  } else {
+
+      notification.textContent = data.error || 'Erreur de connexion';
+      notification.className = 'error';
+
+  }
   } catch (err) {
     console.error(err);
     notification.textContent = 'Impossible de contacter le serveur';
