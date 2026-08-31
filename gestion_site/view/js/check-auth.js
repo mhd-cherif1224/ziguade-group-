@@ -19,7 +19,7 @@
     if (!res.ok) {
       localStorage.removeItem('token');
       localStorage.removeItem('role');
-      window.location.href = '/html/login-admin.html';
+      window.location.href = '/html/admin-dashboard.html';
       return;
     }
 
