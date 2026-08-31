@@ -72,15 +72,11 @@ router.post("/login", async (req, res) => {
                 { expiresIn: "1d" }
             );
 
-            res.cookie("token", token, {
-                httpOnly: true,
-                sameSite: "lax"
-            });
-
             return res.json({
                 success: true,
                 message: "Connexion administrateur réussie.",
-                role: "admin"
+                role: "admin",
+                token
             });
 
         }
@@ -112,15 +108,11 @@ router.post("/login", async (req, res) => {
                     { expiresIn: "1d" }
                 );
 
-                res.cookie("token", token, {
-                    httpOnly: true,
-                    sameSite: "lax"
-                });
-
                 return res.json({
                     success: true,
                     message: "Connexion utilisateur réussie.",
-                    role: "utilisateur"
+                    role: "utilisateur",
+                    token
                 });
 
             }
@@ -144,8 +136,9 @@ router.post("/login", async (req, res) => {
 });
 
 // POST /api/logout
+// Nothing to clear server-side anymore — logout is purely client-side
+// (remove the token from localStorage). Route kept for compatibility.
 router.post('/logout', (req, res) => {
-  res.clearCookie('token');
   res.json({ message: 'Déconnecté' });
 });
 
