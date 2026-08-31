@@ -36,7 +36,7 @@ app.use('/api', apidashboard);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use('/api', apiClientRouter)
 app.use('/api', webhookRouter);
-app.use("/main",express.static(path.join(__dirname, "../main_site/front-end")));
+app.use("/main", express.static(path.join(__dirname, "main-front-end")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
