@@ -45,7 +45,7 @@ app.get('/api/me', authenticateToken, (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'view', 'html', 'admin-dashboard.html'));
+  res.sendFile(path.join(__dirname, 'view', 'html', 'login-admin.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
