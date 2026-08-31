@@ -1,180 +1,72 @@
 const express = require('express');
-const db = require('../Controller/db');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+require("./cron/messageAlarm");
 
-const router = express.Router();
 
-async function query(sql, params = []) {
-  const [rows] = await db.query(sql, params);
-  return rows;
-}
+const apiRouter = require('./model/api.js');
+const apiAdminRouter = require('./model/api-admin');
+const apiUtilisateurRouter = require('./model/api-user');
+const apidashboard = require('./model/api-dashboard');
+const apiAuthRouter = require('./model/api-auth');
+const apiClientRouter = require('./model/api-client');
+const webhookRouter = require('./model/webhook');
 
-async function getUtilisateurs() {
-  const rows = await query(
-    'SELECT id, nom, prenom, username FROM utilisateur ORDER BY id DESC'
-  );
 
-  return rows.map((row) => ({
-    id: row.id,
-    nom: row.nom,
-    prenom: row.prenom,
-    username: row.username
-  }));
-}
 
-async function getUtilisateurById(id) {
-  const rows = await query(
-    'SELECT id, nom, prenom, username FROM utilisateur WHERE id = ?',
-    [id]
-  );
+const authenticateToken = require('./Controller/auth-middleware');
 
-  return rows[0] || null;
-}
+const app = express();
+const PORT = 3001;
 
-async function createUtilisateur({ nom, prenom, username, password }) {
-  const result = await query(
-    'INSERT INTO utilisateur (nom, prenom, username, password) VALUES (?, ?, ?, ?)',
-    [nom, prenom, username, password]
-  );
+app.use(express.json());
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'view')));
 
-  return {
-    id: result.insertId,
-    nom,
-    prenom,
-    username
-  };
-}
+app.use('/api', apiAuthRouter);
+app.use('/api', apiRouter);
+app.use('/api', apiAdminRouter);
+app.use('/api', apiUtilisateurRouter);
+app.use('/api', apidashboard);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use('/api', apiClientRouter)
+app.use('/api', webhookRouter);
+app.use("/main",express.static(path.join(__dirname, "../main_site/front-end")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-async function updateUtilisateur(id, { nom, prenom, username, password }) {
-  if (password) {
-    await query(
-      'UPDATE utilisateur SET nom = ?, prenom = ?, username = ?, password = ? WHERE id = ?',
-      [nom, prenom, username, password, id]
-    );
-  } else {
-    await query(
-      'UPDATE utilisateur SET nom = ?, prenom = ?, username = ? WHERE id = ?',
-      [nom, prenom, username, id]
-    );
-  }
 
-  return getUtilisateurById(id);
-}
 
-async function deleteUtilisateur(id) {
-  await query(
-    'DELETE FROM utilisateur WHERE id = ?',
-    [id]
-  );
-}
 
-// GET /api/utilisateurs
-router.get('/utilisateurs', async (req, res) => {
-  try {
-    const utilisateurs = await getUtilisateurs();
-    res.json(utilisateurs);
-  } catch (err) {
-    console.error('Error fetching utilisateurs:', err);
-    res.status(500).json({
-      error: 'Erreur lors de la récupération des utilisateurs'
-    });
-  }
+//);
+// GET /api/me — lets the frontend check "am I logged in?" and get admin info
+app.get('/api/me', authenticateToken, (req, res) => {
+  res.json({ admin: req.user });
 });
 
-// GET /api/utilisateurs/:id
-router.get('/utilisateurs/:id', async (req, res) => {
-  try {
-    const utilisateur = await getUtilisateurById(req.params.id);
+// Page guard: only serve the dashboard HTML if the token cookie is valid.
+// Otherwise, redirect to the login page instead of returning JSON.
+function requirePageAuth(req, res, next) {
+  const token = req.cookies?.token;
 
-    if (!utilisateur) {
-      return res.status(404).json({
-        error: 'Utilisateur introuvable'
-      });
+  if (!token) {
+    return res.redirect('/html/login-admin.html');
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err) => {
+    if (err) {
+      return res.redirect('/html/login-admin.html');
     }
+    next();
+  });
+}
 
-    res.json(utilisateur);
-  } catch (err) {
-    console.error('Error fetching utilisateur:', err);
-    res.status(500).json({
-      error: "Erreur lors de la récupération de l'utilisateur"
-    });
-  }
+app.get('/', requirePageAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'view', 'html', 'admin-dashboard.html'));
 });
 
-// POST /api/utilisateurs
-router.post('/utilisateurs', async (req, res) => {
-  try {
-    const { nom, prenom, username, password } = req.body;
-
-    if (!username || !password) {
-      return res.status(400).json({
-        error: 'Les champs "username" et "password" sont requis'
-      });
-    }
-
-    const utilisateur = await createUtilisateur({
-      nom,
-      prenom,
-      username,
-      password
-    });
-
-    res.status(201).json(utilisateur);
-  } catch (err) {
-    console.error('Error creating utilisateur:', err);
-    res.status(500).json({
-      error: "Erreur lors de la création de l'utilisateur"
-    });
-  }
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Gestion site server running at http://localhost:${PORT}`);
 });
 
-// PUT /api/utilisateurs/:id
-router.put('/utilisateurs/:id', async (req, res) => {
-  try {
-    const { nom, prenom, username, password } = req.body;
-
-    const existing = await getUtilisateurById(req.params.id);
-
-    if (!existing) {
-      return res.status(404).json({
-        error: 'Utilisateur introuvable'
-      });
-    }
-
-    const utilisateur = await updateUtilisateur(req.params.id, {
-      nom,
-      prenom,
-      username,
-      password
-    });
-
-    res.json(utilisateur);
-  } catch (err) {
-    console.error('Error updating utilisateur:', err);
-    res.status(500).json({
-      error: "Erreur lors de la mise à jour de l'utilisateur"
-    });
-  }
-});
-
-// DELETE /api/utilisateurs/:id
-router.delete('/utilisateurs/:id', async (req, res) => {
-  try {
-    const existing = await getUtilisateurById(req.params.id);
-
-    if (!existing) {
-      return res.status(404).json({
-        error: 'Utilisateur introuvable'
-      });
-    }
-
-    await deleteUtilisateur(req.params.id);
-    res.status(204).send();
-  } catch (err) {
-    console.error('Error deleting utilisateur:', err);
-    res.status(500).json({
-      error: "Erreur lors de la suppression de l'utilisateur"
-    });
-  }
-});
-
-module.exports = router;
+console.log(path.join(__dirname, "../main_site/front-end"));
