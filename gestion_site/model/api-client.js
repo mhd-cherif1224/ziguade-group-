@@ -86,6 +86,21 @@ router.get('/clients', async (req, res) => {
   }
 });
 
+// DEBUG: quick health endpoint to inspect clients table
+router.get('/clients/debug', async (req, res) => {
+  try {
+    const countRows = await query('SELECT COUNT(*) AS c FROM clients');
+    const count = countRows?.[0]?.c ?? 0;
+
+    const sample = await query('SELECT id, name, phone FROM clients ORDER BY id DESC LIMIT 10');
+
+    res.json({ count, sample });
+  } catch (err) {
+    console.error('Error in /api/clients/debug:', err);
+    res.status(500).json({ error: 'Debug endpoint failed' });
+  }
+});
+
 // GET /api/clients/:id
 router.get('/clients/:id', async (req, res) => {
   try {
