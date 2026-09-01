@@ -46,6 +46,7 @@
 
                     <!-- Search mode -->
                     <div id="searchMode" class="audience-panel">
+                        <p class="muted-empty">Mode recherche — cherchez des clients un par un et ajoutez-les à la liste d'envoi.</p>
                         <div class="field">
                             <label for="clientSearch">Nom, téléphone ou tag</label>
                             <input type="text" id="clientSearch" placeholder="Rechercher un client…" autocomplete="off">
@@ -92,6 +93,8 @@
                         <div id="excludedClients" class="selected-clients">
                             <p class="muted-empty">Aucune exception ajoutée.</p>
                         </div>
+
+                        <p class="muted-empty" style="margin-top:10px;font-size:13px;">Note: les exceptions retirent les clients de la plage. Par exemple, si `startId=1` et `limit=100` et vous excluez 1 client dans cette plage, le compteur affichera 99.</p>
                     </div>
 
                     <div class="audience-count" id="audienceCount">0 client sélectionné</div>

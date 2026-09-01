@@ -564,7 +564,20 @@ function updateAudienceCount() {
     } else {
         const start = Number(startIdInput.value) || 0;
         const limit = Number(limitInput.value) || 0;
-        count = limit > 0 && start > 0 ? limit : 0;
+        if (limit > 0 && start > 0) {
+            const end = start + limit - 1;
+
+            // Count how many excluded clients fall inside the requested range
+            let excludesInRange = 0;
+            excludedClients.forEach((c) => {
+                const idNum = Number(c.id);
+                if (idNum >= start && idNum <= end) excludesInRange++;
+            });
+
+            count = Math.max(0, limit - excludesInRange);
+        } else {
+            count = 0;
+        }
     }
 
     audienceCountEl.textContent =
@@ -749,9 +762,22 @@ form.addEventListener('submit', async (event) => {
         return;
     }
 
-    const totalRequested = audienceMode === 'search'
-        ? selectedClients.size
-        : Number(limitInput.value) || 0;
+    let totalRequested = 0;
+    if (audienceMode === 'search') {
+        totalRequested = selectedClients.size;
+    } else {
+        const start = Number(startIdInput.value) || 0;
+        const limit = Number(limitInput.value) || 0;
+        const end = start + limit - 1;
+
+        let excludesInRange = 0;
+        excludedClients.forEach((c) => {
+            const idNum = Number(c.id);
+            if (idNum >= start && idNum <= end) excludesInRange++;
+        });
+
+        totalRequested = Math.max(0, limit - excludesInRange);
+    }
 
     setSending(true);
 
@@ -769,6 +795,16 @@ form.addEventListener('submit', async (event) => {
         } else {
             formData.append('startId', startIdInput.value);
             formData.append('limit', limitInput.value);
+
+            if (excludedClients.size) {
+                formData.append('excludeIds', JSON.stringify(Array.from(excludedClients.keys())));
+            }
+        }
+
+        if (totalRequested === 0) {
+            setSending(false);
+            showStatus('Aucun destinataire après application des exceptions.', true);
+            return;
         }
 
         const template = getSelectedTemplate();
