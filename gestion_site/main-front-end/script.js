@@ -21,8 +21,11 @@ const rangeModePanel = document.getElementById('rangeMode');
 
 const clientSearchInput = document.getElementById('clientSearch');
 const searchResultsEl = document.getElementById('searchResults');
+const rangeExceptionSearchInput = document.getElementById('rangeExceptionSearch');
+const rangeSearchResultsEl = document.getElementById('rangeSearchResults');
 const optInOnlyInput = document.getElementById('optInOnly');
 const selectedClientsEl = document.getElementById('selectedClients');
+const excludedClientsEl = document.getElementById('excludedClients');
 const audienceCountEl = document.getElementById('audienceCount');
 
 const submitBtn = document.getElementById('submitBtn');
@@ -45,6 +48,7 @@ const retryFailedBtn = document.getElementById('retryFailedBtn');
 let loadedTemplates = [];
 let audienceMode = 'search'; // 'search' | 'range'
 let selectedClients = new Map(); // id -> { id, name, phone }
+let excludedClients = new Map(); // id -> { id, name, phone }
 let lastFailedClientIds = [];
 let searchDebounceTimer = null;
 
@@ -365,7 +369,7 @@ function renderSearchResults(clients) {
         row.className = 'search-result-row' + (isAdded ? ' is-added' : '');
         row.innerHTML = `
             <div>
-                <div class="search-result-name">${escapeHtml(client.name || 'Client sans nom')}</div>
+                <div class="search-result-name">${escapeHtml(client.name || 'Client sans nom')} <small>#${client.id}</small></div>
                 <div class="search-result-meta">${escapeHtml(client.phone || '')}</div>
             </div>
             <span>${isAdded ? 'Ajouté' : '+ Ajouter'}</span>
@@ -392,6 +396,71 @@ clientSearchInput.addEventListener('input', () => {
     }, 300);
 });
 
+
+// -----------------------------
+// Range mode exception search
+// -----------------------------
+let rangeSearchDebounce = null;
+async function runRangeExceptionSearch(query) {
+    if (!query.trim()) {
+        rangeSearchResultsEl.hidden = true;
+        rangeSearchResultsEl.innerHTML = '';
+        return;
+    }
+
+    rangeSearchResultsEl.hidden = false;
+    rangeSearchResultsEl.innerHTML = '<div class="search-loading">Recherche…</div>';
+
+    try {
+        const params = new URLSearchParams({ q: query.trim(), limit: 50, offset: 0 });
+        const response = await fetch(`/api/clients?${params.toString()}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Erreur');
+
+        renderRangeSearchResults(Array.isArray(data) ? data : (data.clients || []));
+
+    } catch (err) {
+        console.error('Range search error:', err);
+        rangeSearchResultsEl.innerHTML = '<div class="search-empty">Recherche indisponible pour le moment.</div>';
+    }
+}
+
+function renderRangeSearchResults(clients) {
+    if (!clients.length) {
+        rangeSearchResultsEl.innerHTML = '<div class="search-empty">Aucun client trouvé.</div>';
+        return;
+    }
+
+    rangeSearchResultsEl.innerHTML = '';
+
+    clients.forEach((client) => {
+        const isExcluded = excludedClients.has(String(client.id));
+
+        const row = document.createElement('div');
+        row.className = 'search-result-row' + (isExcluded ? ' is-added' : '');
+        row.innerHTML = `
+            <div>
+                <div class="search-result-name">${escapeHtml(client.name || 'Client sans nom')} <small>#${client.id}</small></div>
+                <div class="search-result-meta">${escapeHtml(client.phone || '')}</div>
+            </div>
+            <span>${isExcluded ? 'Exclu' : '+ Exclure'}</span>
+        `;
+
+        if (!isExcluded) {
+            row.addEventListener('click', () => addExcludedClient(client));
+        }
+
+        rangeSearchResultsEl.appendChild(row);
+    });
+}
+
+rangeExceptionSearchInput.addEventListener('input', () => {
+    clearTimeout(rangeSearchDebounce);
+    rangeSearchDebounce = setTimeout(() => {
+        runRangeExceptionSearch(rangeExceptionSearchInput.value);
+    }, 300);
+});
+
 optInOnlyInput.addEventListener('change', () => {
     if (clientSearchInput.value.trim()) {
         runClientSearch(clientSearchInput.value);
@@ -412,6 +481,41 @@ function addClient(client) {
 
     // Refresh the results list so the added client shows as "Ajouté".
     runClientSearch(clientSearchInput.value);
+}
+
+function addExcludedClient(client) {
+    excludedClients.set(String(client.id), client);
+    renderExcludedClients();
+    runRangeExceptionSearch(rangeExceptionSearchInput.value);
+}
+
+function removeExcludedClient(id) {
+    excludedClients.delete(String(id));
+    renderExcludedClients();
+}
+
+function renderExcludedClients() {
+    if (!excludedClients.size) {
+        excludedClientsEl.innerHTML = '<p class="muted-empty">Aucune exception ajoutée.</p>';
+        return;
+    }
+
+    excludedClientsEl.innerHTML = '';
+
+    excludedClients.forEach((client) => {
+        const chip = document.createElement('span');
+        chip.className = 'client-chip';
+        chip.innerHTML = `${escapeHtml(client.name || `Client #${client.id}`)} <small>#${client.id}</small>`;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.textContent = '✕';
+        removeBtn.setAttribute('aria-label', `Retirer ${client.name || client.id}`);
+        removeBtn.addEventListener('click', () => removeExcludedClient(client.id));
+
+        chip.appendChild(removeBtn);
+        excludedClientsEl.appendChild(chip);
+    });
 }
 
 function removeClient(id) {

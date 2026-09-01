@@ -79,6 +79,19 @@
                             <label for="endId">Dernier ID</label>
                             <input type="number" id="endId" readonly>
                         </div>
+
+                        <hr>
+
+                        <div class="field">
+                            <label for="rangeExceptionSearch">Exceptions (chercher et ajouter des exclusions)</label>
+                            <input type="text" id="rangeExceptionSearch" placeholder="Rechercher un client à exclure…" autocomplete="off">
+                        </div>
+
+                        <div id="rangeSearchResults" class="search-results" hidden></div>
+
+                        <div id="excludedClients" class="selected-clients">
+                            <p class="muted-empty">Aucune exception ajoutée.</p>
+                        </div>
                     </div>
 
                     <div class="audience-count" id="audienceCount">0 client sélectionné</div>

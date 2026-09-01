@@ -1476,6 +1476,17 @@ router.post(
                 }
             }
 
+            // If caller provided excludeIds (range mode exceptions), filter them out
+            if (req.body.excludeIds) {
+                let exclude = [];
+                try { exclude = JSON.parse(req.body.excludeIds || '[]'); } catch (e) { exclude = []; }
+
+                if (Array.isArray(exclude) && exclude.length) {
+                    const excludeSet = new Set(exclude.map(String));
+                    clients = clients.filter(c => !excludeSet.has(String(c.id)));
+                }
+            }
+
             /* ==========================
                INSERT MESSAGE ONCE
             ========================== */
