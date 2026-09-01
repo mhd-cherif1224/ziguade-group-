@@ -1308,13 +1308,10 @@ router.post(
         try {
 
             const {
-
                 templateName,
-                languageCode = "fr",
-
+                languageCode: requestedLanguageCode,
                 startId,
                 limit
-
             } = req.body;
 
             if (!templateName) {
@@ -1359,6 +1356,11 @@ router.post(
 
             const headerType =
                 getTemplateHeaderType(template);
+
+            // Determine language code to use for sending the template.
+            // Priority: explicit request param > template.language > fallback 'fr'
+            const languageCode =
+                requestedLanguageCode || template.language || 'fr';
 
             const needsFile =
                 [
@@ -1431,35 +1433,47 @@ router.post(
 
             /* ==========================
                GET CLIENTS
+               Supports two modes:
+               - mode=search + clientIds: send only the listed client ids
+               - default: load all clients and optionally filter by startId/limit
             ========================== */
 
-            let clients =
-                await getClients();
+            let clients = [];
 
-            if (startId) {
+            // If caller provided an explicit list of client IDs (search mode)
+            if (req.body.mode === 'search' && req.body.clientIds) {
+                let ids = [];
+                try {
+                    ids = JSON.parse(req.body.clientIds || '[]');
+                } catch (e) {
+                    ids = [];
+                }
 
-                clients =
-                    clients.filter(
+                if (!Array.isArray(ids) || ids.length === 0) {
+                    return res.status(400).json({ error: 'Aucun client sélectionné.' });
+                }
 
-                        c =>
+                // Query only the requested clients
+                const placeholders = ids.map(() => '?').join(',');
+                const rows = await query(
+                    `SELECT id, name, phone FROM clients WHERE id IN (${placeholders})`,
+                    ids
+                );
 
-                            c.id >= Number(startId)
+                // Preserve the order requested by the clientIds array
+                const rowsById = Object.fromEntries(rows.map(r => [String(r.id), r]));
+                clients = ids.map(i => rowsById[String(i)]).filter(Boolean);
 
-                    );
+            } else {
+                clients = await getClients();
 
-            }
+                if (startId) {
+                    clients = clients.filter(c => c.id >= Number(startId));
+                }
 
-            if (limit) {
-
-                clients =
-                    clients.slice(
-
-                        0,
-
-                        Number(limit)
-
-                    );
-
+                if (limit) {
+                    clients = clients.slice(0, Number(limit));
+                }
             }
 
             /* ==========================

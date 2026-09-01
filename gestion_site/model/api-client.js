@@ -58,7 +58,27 @@ async function deleteClient(id) {
 // GET /api/clients
 router.get('/clients', async (req, res) => {
   try {
-    const clients = await getClients();
+    // Support basic search and pagination via query params:
+    // ?q=term&limit=50&offset=0
+    const q = (req.query.q || '').trim();
+    const limit = Math.min(Number(req.query.limit) || 50, 200);
+    const offset = Number(req.query.offset) || 0;
+
+    let sql = 'SELECT id, name, phone FROM clients';
+    const params = [];
+
+    if (q) {
+      sql += ' WHERE name LIKE ? OR phone LIKE ?';
+      params.push(`%${q}%`, `%${q}%`);
+    }
+
+    sql += ' ORDER BY id DESC LIMIT ? OFFSET ?';
+    params.push(limit, offset);
+
+    const rows = await query(sql, params);
+
+    const clients = rows.map((row) => ({ id: row.id, name: row.name, phone: row.phone }));
+
     res.json(clients);
   } catch (err) {
     console.error('Error fetching clients:', err);

@@ -329,7 +329,8 @@ async function runClientSearch(query) {
     try {
         const params = new URLSearchParams({
             q: query.trim(),
-            optInOnly: optInOnlyInput.checked ? '1' : '0'
+            limit: 50,
+            offset: 0
         });
 
         const response = await fetch(`/api/clients?${params.toString()}`);
