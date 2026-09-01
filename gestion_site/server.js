@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-require("./cron/messageAlarm");
+const compression = require('compression');
 
 const apiRouter = require('./model/api.js');
 const apiAdminRouter = require('./model/api-admin');
@@ -17,15 +17,20 @@ const PORT = 3001;
 
 app.use(express.json());
 
+// Basic hardening + compression
+app.disable('x-powered-by');
+app.use(compression());
+
 // ------------------------------------------------------------
 // Static assets — safe to register first now, since page-level
 // auth is no longer enforced server-side. The dashboard page loads
 // for anyone, but check-auth.js (running in the page) verifies the
 // token against /api/me and redirects to login if it's missing/invalid.
 // ------------------------------------------------------------
-app.use(express.static(path.join(__dirname, 'view')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/main', express.static(path.join(__dirname, 'main-front-end')));
+// Serve static assets with a caching policy
+app.use(express.static(path.join(__dirname, 'view'), { maxAge: '1d' }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: '1d' }));
+app.use('/main', express.static(path.join(__dirname, 'main-front-end'), { maxAge: '1d' }));
 
 // ------------------------------------------------------------
 // API routes
@@ -51,3 +56,6 @@ app.get('/', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Gestion site server running at http://localhost:${PORT}`);
 });
+
+// Start background cron AFTER the server is listening so startup isn't delayed
+require("./cron/messageAlarm");

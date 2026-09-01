@@ -13,7 +13,6 @@
             <div class="brand">
                 <div class="image-container">
                     <img src="ziguade-tour-logo.jpeg" alt="Logo Ziguade Tour" class="logo">
-
                 </div>
                 <div>
                     <p class="eyebrow">Ziguade Tour</p>
@@ -33,21 +32,60 @@
                 </div>
 
                 <form id="contentForm">
+
+                    <!-- ============================= -->
+                    <!-- AUDIENCE SELECTION             -->
+                    <!-- ============================= -->
                     <div class="field">
-                        <label for="startId">ID de départ</label>
-                        <input type="number" id="startId" min="1" value="1">
+                        <span>Destinataires</span>
+                        <div class="mode-switch" role="tablist">
+                            <button type="button" class="mode-btn is-active" data-mode="search" id="modeSearchBtn">Rechercher des clients</button>
+                            <button type="button" class="mode-btn" data-mode="range" id="modeRangeBtn">Plage d'ID</button>
+                        </div>
                     </div>
 
-                    <div class="field">
-                        <label for="limit">Nombre de clients</label>
-                        <input type="number" id="limit" min="1" value="100">
+                    <!-- Search mode -->
+                    <div id="searchMode" class="audience-panel">
+                        <div class="field">
+                            <label for="clientSearch">Nom, téléphone ou tag</label>
+                            <input type="text" id="clientSearch" placeholder="Rechercher un client…" autocomplete="off">
+                        </div>
+
+                        <div id="searchResults" class="search-results" hidden></div>
+
+                        <label class="checkbox-row">
+                            <input type="checkbox" id="optInOnly" checked>
+                            <span>Clients ayant donné leur consentement uniquement</span>
+                        </label>
+
+                        <div id="selectedClients" class="selected-clients">
+                            <p class="muted-empty">Aucun client sélectionné pour l'instant.</p>
+                        </div>
                     </div>
 
-                    <div class="field">
-                        <label for="endId">Dernier ID</label>
-                        <input type="number" id="endId" readonly>
+                    <!-- Range mode -->
+                    <div id="rangeMode" class="audience-panel" hidden>
+                        <div class="field">
+                            <label for="startId">ID de départ</label>
+                            <input type="number" id="startId" min="1" value="1">
+                        </div>
+
+                        <div class="field">
+                            <label for="limit">Nombre de clients</label>
+                            <input type="number" id="limit" min="1" value="100">
+                        </div>
+
+                        <div class="field">
+                            <label for="endId">Dernier ID</label>
+                            <input type="number" id="endId" readonly>
+                        </div>
                     </div>
 
+                    <div class="audience-count" id="audienceCount">0 client sélectionné</div>
+
+                    <!-- ============================= -->
+                    <!-- TEMPLATE                       -->
+                    <!-- ============================= -->
                     <label class="field">
                         <span>Nom du template</span>
                         <select id="templateName" name="templateName" required>
@@ -64,7 +102,15 @@
 
                     <div id="preview" class="preview-grid"></div>
 
-                    <button type="submit">Publier</button>
+                    <button type="submit" id="submitBtn" disabled>
+                        <span class="btn-label">Publier</span>
+                        <span class="btn-spinner" hidden></span>
+                    </button>
+
+                    <div id="sendProgress" class="send-progress" hidden>
+                        <div class="send-progress-bar"><div class="send-progress-fill" id="sendProgressFill"></div></div>
+                        <p id="sendProgressText">Envoi en cours…</p>
+                    </div>
                 </form>
             </section>
 
@@ -80,6 +126,12 @@
                     <p id="previewTemplateName">Template : —</p>
                     <p id="previewText">Le contenu sera rempli à partir du template approuvé.</p>
                     <div id="previewMedia" class="preview-media"></div>
+                </div>
+
+                <div class="preview-box result-box" id="resultBox" hidden>
+                    <h3>Résultat de l'envoi</h3>
+                    <div class="result-stats" id="resultStats"></div>
+                    <button type="button" class="ghost-btn" id="retryFailedBtn" hidden>Réessayer les échecs</button>
                 </div>
             </aside>
         </main>
