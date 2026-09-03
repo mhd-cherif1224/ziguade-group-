@@ -50,6 +50,65 @@ function formatBytes(bytes) {
 async function loadMessages() {
     const tbody = document.getElementById('messagesBody');
 
+    const colorReponse = '#f66868';
+    const colorTemplate = '#62d269';
+
+    const getDisplayValue = (value, fallback = '—') => value ?? fallback;
+
+    const getSenderLabel = (message) => {
+        const senderName =
+            message.sender_name ??
+            message.senderName ??
+            message.from_name ??
+            message.fromName ??
+            message.client_name ??
+            message.clientName ??
+            message.client_phone ??
+            message.clientPhone ??
+            message.phone ??
+            null;
+
+        if (message.direction === 'received' || message.send_mode === 'reponse') {
+            return getDisplayValue(senderName, 'Client');
+        }
+
+        return 'Admin / Entreprise';
+    };
+
+    const getReceiverLabel = (message) => {
+        const receiverName =
+            message.receiver_name ??
+            message.receiverName ??
+            message.to_name ??
+            message.toName ??
+            message.client_name ??
+            message.clientName ??
+            message.client_phone ??
+            message.clientPhone ??
+            message.phone ??
+            null;
+
+        if (message.direction === 'sent' && message.send_mode !== 'reponse') {
+            return getDisplayValue(receiverName, 'Client');
+        }
+
+        return 'Admin / Entreprise';
+    };
+
+    const getRowColor = (message) => {
+        const mode = String(message.send_mode ?? '').toLowerCase();
+
+        if (mode === 'template') {
+            return colorTemplate;
+        }
+
+        if (mode === 'reponse' || message.direction === 'received') {
+            return colorReponse;
+        }
+
+        return '';
+    };
+
     try {
         const response = await fetch('/api/messages');
 
@@ -62,7 +121,7 @@ async function loadMessages() {
         tbody.innerHTML = '';
 
         if (messages.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10">Aucun message trouvé.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="12">Aucun message trouvé.</td></tr>';
             return;
         }
 
@@ -71,10 +130,18 @@ async function loadMessages() {
             row.classList.add('message-row');
             row.dataset.id = message.id;
 
+            const rowColor = getRowColor(message);
+            if (rowColor) {
+                row.style.backgroundColor = rowColor;
+                row.style.color = '#111827';
+            }
+
             row.innerHTML = `
                 <td>${message.id}</td>
                 <td>${message.type}</td>
                 <td class="message-preview">${message.send_mode ?? '—'}</td>
+                <td>${getSenderLabel(message)}</td>
+                <td>${getReceiverLabel(message)}</td>
                 <td class="message-preview">${message.text ?? '—'}</td>
                 <td class="message-preview">${message.caption ?? '—'}</td>
                 <td>${message.file ? message.file.path : '—'}</td>
@@ -96,7 +163,7 @@ async function loadMessages() {
         });
     } catch (err) {
         console.error('Erreur lors du chargement des messages:', err);
-        tbody.innerHTML = '<tr><td colspan="10">Erreur lors du chargement des messages.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12">Erreur lors du chargement des messages.</td></tr>';
     }
 }
 
