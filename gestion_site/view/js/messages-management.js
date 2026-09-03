@@ -50,8 +50,8 @@ function formatBytes(bytes) {
 async function loadMessages() {
     const tbody = document.getElementById('messagesBody');
 
-    const colorReponse = '#f66868';
-    const colorTemplate = '#62d269';
+    const colorReponse = '#f29c9c';
+    const colorTemplate = '#aef5b3';
 
     const getDisplayValue = (value, fallback = '—') => value ?? fallback;
 
