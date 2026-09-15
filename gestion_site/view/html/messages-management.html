@@ -371,12 +371,62 @@
             background: #fff;
         }
 
+        .table-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 14px;
+        }
+
+        .search-field {
+            position: relative;
+            width: min(100%, 420px);
+        }
+
+        .search-field svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            width: 18px;
+            height: 18px;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            pointer-events: none;
+        }
+
+        .search-field input {
+            width: 100%;
+            height: 46px;
+            padding: 0 16px 0 44px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.78);
+            box-shadow: 0 8px 22px rgba(16, 24, 40, 0.04);
+            font: inherit;
+            font-size: 14px;
+            color: var(--gray-900);
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .search-field input:focus {
+            border-color: var(--purple-400);
+            box-shadow: 0 0 0 4px rgba(116, 84, 246, 0.12);
+        }
+
         @media (max-width: 700px) {
             .conversation-composer,
             .conversation-composer-file-name,
             .conversation-composer-blocked {
                 padding-left: 10px;
                 padding-right: 10px;
+            }
+
+            .table-toolbar {
+                justify-content: stretch;
+            }
+
+            .search-field {
+                width: 100%;
             }
         }
 
@@ -447,6 +497,16 @@
         </section>
 
         <section class="table-shell">
+            <div class="table-toolbar">
+                <label class="search-field" aria-label="Rechercher un message">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+                    </svg>
+                    <input id="messageSearchInput" type="search" placeholder="Rechercher un message, client ou fichier..." autocomplete="off" />
+                </label>
+            </div>
+
             <table>
                 <thead>
                     <tr>

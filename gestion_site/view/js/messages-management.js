@@ -44,103 +44,158 @@ function formatBytes(bytes) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Chargement du tableau des messages                                  */
+/* Chargement + rendu du tableau des messages                          */
 /* ------------------------------------------------------------------ */
 
-async function loadMessages() {
-    const tbody = document.getElementById('messagesBody');
+// Toutes les données reçues du serveur, non filtrées — la recherche
+// filtre localement cette liste plutôt que de refaire un appel réseau.
+let allMessages = [];
 
-    const colorReponse = '#f29c9c';
-    const colorTemplate = '#aef5b3';
+const ROW_COLOR_REPONSE = '#f29c9c';
+const ROW_COLOR_TEMPLATE = '#aef5b3';
 
-    const getDisplayValue = (value, fallback = '—') => value ?? fallback;
+const getDisplayValue = (value, fallback = '—') => value ?? fallback;
 
-    // Nom de la personne (le client, jamais "Admin / Entreprise") à
-    // afficher dans la cellule "Conversation", peu importe le sens.
-    const getConversationName = (message) => {
-        const clientName =
-            message.client_name ??
-            message.clientName ??
-            message.sender_name ??
-            message.senderName ??
-            message.receiver_name ??
-            message.receiverName ??
-            message.client_phone ??
-            message.clientPhone ??
-            message.phone ??
-            null;
+// Nom de la personne (le client, jamais "Admin / Entreprise") à
+// afficher dans la cellule "Conversation", peu importe le sens.
+function getConversationName(message) {
+    const clientName =
+        message.client_name ??
+        message.clientName ??
+        message.sender_name ??
+        message.senderName ??
+        message.receiver_name ??
+        message.receiverName ??
+        message.client_phone ??
+        message.clientPhone ??
+        message.phone ??
+        null;
 
-        return getDisplayValue(clientName, 'Client');
-    };
+    return getDisplayValue(clientName, 'Client');
+}
 
-    const getInitials = (name) => {
-        if (!name || name === '—') return '?';
-        const parts = name.trim().split(/\s+/);
-        const first = parts[0]?.[0] ?? '';
-        const second = parts.length > 1 ? parts[parts.length - 1][0] : '';
-        return (first + second).toUpperCase() || '?';
-    };
+function getInitials(name) {
+    if (!name || name === '—') return '?';
+    const parts = name.trim().split(/\s+/);
+    const first = parts[0]?.[0] ?? '';
+    const second = parts.length > 1 ? parts[parts.length - 1][0] : '';
+    return (first + second).toUpperCase() || '?';
+}
 
-    const broadcastSvg =
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.5 13 22h-2.5l-2-5"/></svg>';
+const BROADCAST_SVG =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.5 13 22h-2.5l-2-5"/></svg>';
 
-    const buildConversationCell = (message) => {
-        // Un template est envoyé EN MASSE à plusieurs clients à la fois :
-        // il n'y a pas "un" client à afficher, donc pas d'avatar/nom ici.
-        // Le détail par destinataire reste dans "Voir les infos".
-        const isTemplate = String(message.send_mode ?? '').toLowerCase() === 'template';
+function buildConversationCell(message) {
+    // Un template est envoyé EN MASSE à plusieurs clients à la fois :
+    // il n'y a pas "un" client à afficher, donc pas d'avatar/nom ici.
+    // Le détail par destinataire reste dans "Voir les infos".
+    const isTemplate = String(message.send_mode ?? '').toLowerCase() === 'template';
 
-        if (isTemplate) {
-            return `
-                <div class="user-cell">
-                    <div class="avatar-initials dir-template">${broadcastSvg}</div>
-                    <div>
-                        <strong>Diffusion (modèle)</strong>
-                        <span class="conversation-direction dir-template">
-                            Envoyé à plusieurs destinataires
-                        </span>
-                    </div>
-                </div>
-            `;
-        }
-
-        const fromClient = message.direction === 'received' || message.send_mode === 'reponse';
-        const dirClass = fromClient ? 'dir-received' : 'dir-sent';
-        const name = getConversationName(message);
-        const initials = getInitials(name);
-
-        // Flèche entrante (client -> admin) ou sortante (admin -> client)
-        const arrowSvg = fromClient
-            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>'
-            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
-
+    if (isTemplate) {
         return `
             <div class="user-cell">
-                <div class="avatar-initials ${dirClass}">${initials}</div>
+                <div class="avatar-initials dir-template">${BROADCAST_SVG}</div>
                 <div>
-                    <strong>${name}</strong>
-                    <span class="conversation-direction ${dirClass}">
-                        ${arrowSvg}
-                        ${fromClient ? 'Reçu du client' : 'Envoyé au client'}
+                    <strong>Diffusion (modèle)</strong>
+                    <span class="conversation-direction dir-template">
+                        Envoyé à plusieurs destinataires
                     </span>
                 </div>
             </div>
         `;
-    };
+    }
 
-    const getRowColor = (message) => {
-        const mode = String(message.send_mode ?? '').toLowerCase();
+    const fromClient = message.direction === 'received' || message.send_mode === 'reponse';
+    const dirClass = fromClient ? 'dir-received' : 'dir-sent';
+    const name = getConversationName(message);
+    const initials = getInitials(name);
 
-        if (mode === 'template') {
-            return colorTemplate;
+    // Flèche entrante (client -> admin) ou sortante (admin -> client)
+    const arrowSvg = fromClient
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+
+    return `
+        <div class="user-cell">
+            <div class="avatar-initials ${dirClass}">${initials}</div>
+            <div>
+                <strong>${name}</strong>
+                <span class="conversation-direction ${dirClass}">
+                    ${arrowSvg}
+                    ${fromClient ? 'Reçu du client' : 'Envoyé au client'}
+                </span>
+            </div>
+        </div>
+    `;
+}
+
+function getRowColor(message) {
+    const mode = String(message.send_mode ?? '').toLowerCase();
+
+    if (mode === 'template') {
+        return ROW_COLOR_TEMPLATE;
+    }
+
+    if (mode === 'reponse' || message.direction === 'received') {
+        return ROW_COLOR_REPONSE;
+    }
+
+    return '';
+}
+
+// Construit et affiche les lignes pour la liste de messages fournie
+// (soit toute la liste, soit un sous-ensemble filtré par la recherche).
+function renderMessagesTable(messages) {
+    const tbody = document.getElementById('messagesBody');
+    tbody.innerHTML = '';
+
+    if (messages.length === 0) {
+        const emptyLabel = allMessages.length === 0
+            ? 'Aucun message trouvé.'
+            : 'Aucun message ne correspond à votre recherche.';
+        tbody.innerHTML = `<tr><td colspan="11">${emptyLabel}</td></tr>`;
+        return;
+    }
+
+    messages.forEach((message) => {
+        const row = document.createElement('tr');
+        row.classList.add('message-row');
+        row.dataset.id = message.id;
+
+        const rowColor = getRowColor(message);
+        if (rowColor) {
+            row.style.backgroundColor = rowColor;
+            row.style.color = '#111827';
         }
 
-        if (mode === 'reponse' || message.direction === 'received') {
-            return colorReponse;
-        }
+        row.innerHTML = `
+            <td>${message.id}</td>
+            <td>${message.type}</td>
+            <td class="message-preview">${message.send_mode ?? '—'}</td>
+            <td>${buildConversationCell(message)}</td>
+            <td class="message-preview">${message.text ?? '—'}</td>
+            <td class="message-preview">${message.caption ?? '—'}</td>
+            <td>${message.file ? message.file.path : '—'}</td>
+            <td>${message.file ? formatBytes(message.file.size) : '—'}</td>
+            <td>${message.file ? message.file.mime_type : '—'}</td>
+            <td>${new Date(message.date_envoie).toLocaleString('fr-FR')}</td>
+            <td><span class="status-badge status-active">${message.status ?? '—'}</span></td>
+        `;
 
-        return '';
-    };
+        // Stocker le message complet sur la ligne pour le menu contextuel
+        row.__message = message;
+
+        row.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            openRowContextMenu(e, message);
+        });
+
+        tbody.appendChild(row);
+    });
+}
+
+async function loadMessages() {
+    const tbody = document.getElementById('messagesBody');
 
     try {
         const response = await fetch('/api/messages');
@@ -149,54 +204,56 @@ async function loadMessages() {
             throw new Error(`Erreur HTTP: ${response.status}`);
         }
 
-        const messages = await response.json();
+        allMessages = await response.json();
 
-        tbody.innerHTML = '';
-
-        if (messages.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="11">Aucun message trouvé.</td></tr>';
-            return;
-        }
-
-        messages.forEach((message) => {
-            const row = document.createElement('tr');
-            row.classList.add('message-row');
-            row.dataset.id = message.id;
-
-            const rowColor = getRowColor(message);
-            if (rowColor) {
-                row.style.backgroundColor = rowColor;
-                row.style.color = '#111827';
-            }
-
-            row.innerHTML = `
-                <td>${message.id}</td>
-                <td>${message.type}</td>
-                <td class="message-preview">${message.send_mode ?? '—'}</td>
-                <td>${buildConversationCell(message)}</td>
-                <td class="message-preview">${message.text ?? '—'}</td>
-                <td class="message-preview">${message.caption ?? '—'}</td>
-                <td>${message.file ? message.file.path : '—'}</td>
-                <td>${message.file ? formatBytes(message.file.size) : '—'}</td>
-                <td>${message.file ? message.file.mime_type : '—'}</td>
-                <td>${new Date(message.date_envoie).toLocaleString('fr-FR')}</td>
-                <td><span class="status-badge status-active">${message.status ?? '—'}</span></td>
-            `;
-
-            // Stocker le message complet sur la ligne pour le menu contextuel
-            row.__message = message;
-
-            row.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                openRowContextMenu(e, message);
-            });
-
-            tbody.appendChild(row);
-        });
+        // Si l'admin est en train de chercher, on réapplique le filtre
+        // sur les nouvelles données au lieu d'écraser sa recherche.
+        applySearch();
     } catch (err) {
         console.error('Erreur lors du chargement des messages:', err);
         tbody.innerHTML = '<tr><td colspan="11">Erreur lors du chargement des messages.</td></tr>';
     }
+}
+
+/* ------------------------------------------------------------------ */
+/* Recherche dans le tableau des messages                              */
+/* ------------------------------------------------------------------ */
+
+// Concatène tous les champs "cherchables" d'un message en une seule
+// chaîne minuscule, une fois par message, pour un filtrage simple.
+function getSearchableText(message) {
+    const isTemplate = String(message.send_mode ?? '').toLowerCase() === 'template';
+
+    return [
+        message.id,
+        message.type,
+        message.send_mode,
+        isTemplate ? 'diffusion modele' : getConversationName(message),
+        message.text,
+        message.caption,
+        message.file ? message.file.path : '',
+        message.file ? message.file.mime_type : '',
+        message.status
+    ]
+        .filter((v) => v !== null && v !== undefined)
+        .join(' ')
+        .toLowerCase();
+}
+
+function applySearch() {
+    const input = document.getElementById('messageSearchInput');
+    const term = (input?.value ?? '').trim().toLowerCase();
+
+    if (!term) {
+        renderMessagesTable(allMessages);
+        return;
+    }
+
+    const filtered = allMessages.filter((message) =>
+        getSearchableText(message).includes(term)
+    );
+
+    renderMessagesTable(filtered);
 }
 
 /* ------------------------------------------------------------------ */
@@ -1078,6 +1135,11 @@ async function sendConversationReply(event) {
 /* ------------------------------------------------------------------ */
 
 document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('messageSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', applySearch);
+    }
+
     loadMessages();
 
     // Rafraîchit le tableau (statuts sent/delivered/read) périodiquement.
