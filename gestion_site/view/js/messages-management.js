@@ -153,7 +153,7 @@ function renderMessagesTable(messages) {
         const emptyLabel = allMessages.length === 0
             ? 'Aucun message trouvé.'
             : 'Aucun message ne correspond à votre recherche.';
-        tbody.innerHTML = `<tr><td colspan="11">${emptyLabel}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10">${emptyLabel}</td></tr>`;
         return;
     }
 
@@ -169,7 +169,7 @@ function renderMessagesTable(messages) {
         }
 
         row.innerHTML = `
-            <td>${message.id}</td>
+            <td>${new Date(message.date_envoie).toLocaleString('fr-FR')}</td>
             <td>${message.type}</td>
             <td class="message-preview">${message.send_mode ?? '—'}</td>
             <td>${buildConversationCell(message)}</td>
@@ -178,7 +178,6 @@ function renderMessagesTable(messages) {
             <td>${message.file ? message.file.path : '—'}</td>
             <td>${message.file ? formatBytes(message.file.size) : '—'}</td>
             <td>${message.file ? message.file.mime_type : '—'}</td>
-            <td>${new Date(message.date_envoie).toLocaleString('fr-FR')}</td>
             <td><span class="status-badge status-active">${message.status ?? '—'}</span></td>
         `;
 
@@ -211,7 +210,7 @@ async function loadMessages() {
         applySearch();
     } catch (err) {
         console.error('Erreur lors du chargement des messages:', err);
-        tbody.innerHTML = '<tr><td colspan="11">Erreur lors du chargement des messages.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10">Erreur lors du chargement des messages.</td></tr>';
     }
 }
 
