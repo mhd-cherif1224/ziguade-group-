@@ -55,44 +55,77 @@ async function loadMessages() {
 
     const getDisplayValue = (value, fallback = '—') => value ?? fallback;
 
-    const getSenderLabel = (message) => {
-        const senderName =
+    // Nom de la personne (le client, jamais "Admin / Entreprise") à
+    // afficher dans la cellule "Conversation", peu importe le sens.
+    const getConversationName = (message) => {
+        const clientName =
+            message.client_name ??
+            message.clientName ??
             message.sender_name ??
             message.senderName ??
-            message.from_name ??
-            message.fromName ??
-            message.client_name ??
-            message.clientName ??
-            message.client_phone ??
-            message.clientPhone ??
-            message.phone ??
-            null;
-
-        if (message.direction === 'received' || message.send_mode === 'reponse') {
-            return getDisplayValue(senderName, 'Client');
-        }
-
-        return 'Admin / Entreprise';
-    };
-
-    const getReceiverLabel = (message) => {
-        const receiverName =
             message.receiver_name ??
             message.receiverName ??
-            message.to_name ??
-            message.toName ??
-            message.client_name ??
-            message.clientName ??
             message.client_phone ??
             message.clientPhone ??
             message.phone ??
             null;
 
-        if (message.direction === 'sent' && message.send_mode !== 'reponse') {
-            return getDisplayValue(receiverName, 'Client');
+        return getDisplayValue(clientName, 'Client');
+    };
+
+    const getInitials = (name) => {
+        if (!name || name === '—') return '?';
+        const parts = name.trim().split(/\s+/);
+        const first = parts[0]?.[0] ?? '';
+        const second = parts.length > 1 ? parts[parts.length - 1][0] : '';
+        return (first + second).toUpperCase() || '?';
+    };
+
+    const broadcastSvg =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.5 13 22h-2.5l-2-5"/></svg>';
+
+    const buildConversationCell = (message) => {
+        // Un template est envoyé EN MASSE à plusieurs clients à la fois :
+        // il n'y a pas "un" client à afficher, donc pas d'avatar/nom ici.
+        // Le détail par destinataire reste dans "Voir les infos".
+        const isTemplate = String(message.send_mode ?? '').toLowerCase() === 'template';
+
+        if (isTemplate) {
+            return `
+                <div class="user-cell">
+                    <div class="avatar-initials dir-template">${broadcastSvg}</div>
+                    <div>
+                        <strong>Diffusion (modèle)</strong>
+                        <span class="conversation-direction dir-template">
+                            Envoyé à plusieurs destinataires
+                        </span>
+                    </div>
+                </div>
+            `;
         }
 
-        return 'Admin / Entreprise';
+        const fromClient = message.direction === 'received' || message.send_mode === 'reponse';
+        const dirClass = fromClient ? 'dir-received' : 'dir-sent';
+        const name = getConversationName(message);
+        const initials = getInitials(name);
+
+        // Flèche entrante (client -> admin) ou sortante (admin -> client)
+        const arrowSvg = fromClient
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+
+        return `
+            <div class="user-cell">
+                <div class="avatar-initials ${dirClass}">${initials}</div>
+                <div>
+                    <strong>${name}</strong>
+                    <span class="conversation-direction ${dirClass}">
+                        ${arrowSvg}
+                        ${fromClient ? 'Reçu du client' : 'Envoyé au client'}
+                    </span>
+                </div>
+            </div>
+        `;
     };
 
     const getRowColor = (message) => {
@@ -121,7 +154,7 @@ async function loadMessages() {
         tbody.innerHTML = '';
 
         if (messages.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="12">Aucun message trouvé.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11">Aucun message trouvé.</td></tr>';
             return;
         }
 
@@ -140,8 +173,7 @@ async function loadMessages() {
                 <td>${message.id}</td>
                 <td>${message.type}</td>
                 <td class="message-preview">${message.send_mode ?? '—'}</td>
-                <td>${getSenderLabel(message)}</td>
-                <td>${getReceiverLabel(message)}</td>
+                <td>${buildConversationCell(message)}</td>
                 <td class="message-preview">${message.text ?? '—'}</td>
                 <td class="message-preview">${message.caption ?? '—'}</td>
                 <td>${message.file ? message.file.path : '—'}</td>
@@ -163,7 +195,7 @@ async function loadMessages() {
         });
     } catch (err) {
         console.error('Erreur lors du chargement des messages:', err);
-        tbody.innerHTML = '<tr><td colspan="12">Erreur lors du chargement des messages.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11">Erreur lors du chargement des messages.</td></tr>';
     }
 }
 
