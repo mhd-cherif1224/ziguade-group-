@@ -2,6 +2,46 @@ const pendingMessagesBody = document.getElementById('pendingMessagesBody');
 const pendingSearchInput = document.getElementById('pendingSearchInput');
 
 let allPendingMessages = [];
+let activePendingMenu = null;
+
+function closePendingMenu() {
+    if (activePendingMenu) {
+        activePendingMenu.remove();
+        activePendingMenu = null;
+        document.removeEventListener('click', closePendingMenu);
+        document.removeEventListener('scroll', closePendingMenu, true);
+        document.removeEventListener('keydown', onPendingMenuKeydown);
+    }
+}
+
+function onPendingMenuKeydown(e) {
+    if (e.key === 'Escape') closePendingMenu();
+}
+
+function getClientId(message) {
+    return (
+        message.client_id ??
+        message.clientId ??
+        message.user_id ??
+        message.userId ??
+        message.sender_id ??
+        message.senderId ??
+        message.client?.id ??
+        message.user?.id ??
+        null
+    );
+}
+
+function getClientPhone(message) {
+    return (
+        message.client_phone ??
+        message.clientPhone ??
+        message.phone ??
+        message.client?.phone ??
+        message.user?.phone ??
+        null
+    );
+}
 
 function getDisplayValue(value, fallback = '—') {
     return value ?? fallback;
@@ -170,6 +210,52 @@ function renderPendingMessages(messages) {
             <td class="message-content">${messageText}</td>
             <td><span class="pending-status">À répondre</span></td>
         `;
+
+        row.addEventListener('contextmenu', (event) => {
+            event.preventDefault();
+            closePendingMenu();
+
+            const clientId = getClientId(message);
+            if (!clientId) return;
+
+            const menu = document.createElement('div');
+            menu.className = 'message-context-menu';
+
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = 'Voir la conversation';
+            button.addEventListener('click', () => {
+                closePendingMenu();
+                const payload = {
+                    clientId,
+                    name: getClientName(message),
+                    phone: getClientPhone(message)
+                };
+                localStorage.setItem('pendingConversation', JSON.stringify(payload));
+                window.location.href = 'messages-management.html';
+            });
+
+            menu.appendChild(button);
+            document.body.appendChild(menu);
+
+            const { innerWidth, innerHeight } = window;
+            const menuRect = menu.getBoundingClientRect();
+            let left = event.clientX;
+            let top = event.clientY;
+            if (left + menuRect.width > innerWidth) left = innerWidth - menuRect.width - 8;
+            if (top + menuRect.height > innerHeight) top = innerHeight - menuRect.height - 8;
+
+            menu.style.left = `${left}px`;
+            menu.style.top = `${top}px`;
+
+            activePendingMenu = menu;
+
+            setTimeout(() => {
+                document.addEventListener('click', closePendingMenu);
+                document.addEventListener('scroll', closePendingMenu, true);
+                document.addEventListener('keydown', onPendingMenuKeydown);
+            }, 0);
+        });
 
         pendingMessagesBody.appendChild(row);
     });

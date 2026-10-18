@@ -1133,6 +1133,25 @@ async function sendConversationReply(event) {
 /* Initialisation                                                      */
 /* ------------------------------------------------------------------ */
 
+function openPendingConversationFromStorage() {
+    const raw = localStorage.getItem('pendingConversation');
+    if (!raw) return;
+
+    try {
+        const payload = JSON.parse(raw);
+        if (!payload?.clientId) return;
+
+        localStorage.removeItem('pendingConversation');
+        openConversation(payload.clientId, {
+            name: payload.name || 'Conversation',
+            phone: payload.phone || ''
+        });
+    } catch (err) {
+        console.error('Erreur lors de l’ouverture de la conversation depuis la liste des catégories:', err);
+        localStorage.removeItem('pendingConversation');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('messageSearchInput');
     if (searchInput) {
@@ -1140,6 +1159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     loadMessages();
+    openPendingConversationFromStorage();
 
     // Rafraîchit le tableau (statuts sent/delivered/read) périodiquement.
     // On saute le refresh si un menu contextuel est ouvert pour ne pas
