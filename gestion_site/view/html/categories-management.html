@@ -3,9 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catégories des messages</title>
+    <title>Messages non répondus</title>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/admin-management.css">
+    <style>
+        .table-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 16px 18px 12px;
+            background: #fff;
+            border-bottom: 1px solid #ece9e1;
+        }
+
+        .search-field {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: min(100%, 420px);
+            background: #f8f7f3;
+            border: 1px solid #ece9e1;
+            border-radius: 999px;
+            padding: 10px 14px;
+            color: #5F5E5A;
+        }
+
+        .search-field svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            flex-shrink: 0;
+        }
+
+        .search-field input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-family: 'Sora', sans-serif;
+            font-size: 14px;
+            color: #2C2C2A;
+        }
+
+        .search-field input::placeholder {
+            color: #888780;
+        }
+
+        .pending-row {
+            background: #fff1f2;
+        }
+
+        .pending-row td {
+            color: #2C2C2A;
+        }
+
+        .pending-status {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #fdecec;
+            color: #D85A30;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .message-content {
+            max-width: 300px;
+            white-space: normal;
+            word-break: break-word;
+            color: #5F5E5A;
+            line-height: 1.5;
+        }
+    </style>
 </head>
 <body style="visibility: hidden;">
     <header class="navbar">
@@ -44,29 +115,39 @@
     <main class="container">
         <section class="page-header">
             <div>
-                <p class="eyebrow">Organisation</p>
-                <h1>Catégories des messages</h1>
+                <p class="eyebrow">Messagerie</p>
+                <h1>Messages non répondus</h1>
             </div>
-            <a class="action-chip" href="messages-management.html">Voir les messages</a>
+            <a class="action-chip" href="messages-management.html">Voir tous les messages</a>
         </section>
 
         <section class="table-shell">
+            <div class="table-toolbar">
+                <label class="search-field" aria-label="Rechercher un message non répondu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+                    </svg>
+                    <input id="pendingSearchInput" type="search" placeholder="Rechercher un client ou un message..." autocomplete="off" />
+                </label>
+            </div>
+
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Nom de catégorie</th>
-                        <th>Description</th>
-                        <th>Messages associés</th>
+                        <th>Date</th>
+                        <th>Client</th>
+                        <th>Type</th>
+                        <th>Message</th>
+                        <th>Statut</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        *a faire*
-                    </tr>
-                </tbody>
+                <tbody id="pendingMessagesBody"></tbody>
             </table>
         </section>
     </main>
+
+    <script src="../js/check-auth.js"></script>
+    <script src="../js/categories-management.js"></script>
 </body>
 </html>
