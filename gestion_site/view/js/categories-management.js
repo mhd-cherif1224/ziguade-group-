@@ -85,52 +85,50 @@ function isPendingMessage(message) {
 
 function buildPendingMessages(messages) {
     const byClient = new Map();
+    const seenIds = new Set();
 
     messages.forEach((message) => {
         if (!message) return;
 
+        const id = String(message.id ?? '');
+        if (id && seenIds.has(id)) return;
+        if (id) seenIds.add(id);
+
         const clientKey = getClientKey(message);
-        if (!clientKey || clientKey === 'fallback:') return;
+        if (!clientKey) return;
 
         if (!byClient.has(clientKey)) {
-            byClient.set(clientKey, {
-                clientName: getClientName(message),
-                latestClientMessage: null,
-                latestClientDate: null,
-                latestOutboundDate: null
-            });
+            byClient.set(clientKey, []);
         }
 
-        const bucket = byClient.get(clientKey);
-        const timestamp = new Date(message.date_envoie || 0).getTime();
-
-        if (isClientMessage(message)) {
-            if (!bucket.latestClientMessage || timestamp > new Date(bucket.latestClientMessage.date_envoie || 0).getTime()) {
-                bucket.latestClientMessage = message;
-                bucket.latestClientDate = timestamp;
-            }
-            return;
-        }
-
-        if (timestamp > (bucket.latestOutboundDate ?? -Infinity)) {
-            bucket.latestOutboundDate = timestamp;
-        }
+        byClient.get(clientKey).push(message);
     });
 
     const pending = [];
 
-    byClient.forEach((bucket) => {
-        if (!bucket.latestClientMessage) return;
+    byClient.forEach((thread) => {
+        if (!thread.length) return;
 
-        const latestClientDate = bucket.latestClientDate ?? 0;
-        const latestOutboundDate = bucket.latestOutboundDate ?? null;
+        const sortedThread = [...thread].sort(
+            (a, b) => new Date(a.date_envoie || 0) - new Date(b.date_envoie || 0)
+        );
 
-        if (!latestOutboundDate || latestOutboundDate < latestClientDate) {
-            pending.push(bucket.latestClientMessage);
+        const lastMessage = sortedThread[sortedThread.length - 1];
+        if (!lastMessage || !isClientMessage(lastMessage)) return;
+
+        const lastOutboundMessage = [...sortedThread]
+            .reverse()
+            .find((message) => !isClientMessage(message));
+
+        if (
+            !lastOutboundMessage ||
+            new Date(lastOutboundMessage.date_envoie || 0) < new Date(lastMessage.date_envoie || 0)
+        ) {
+            pending.push(lastMessage);
         }
     });
 
-    return pending.sort((a, b) => new Date(b.date_envoie) - new Date(a.date_envoie));
+    return pending.sort((a, b) => new Date(b.date_envoie || 0) - new Date(a.date_envoie || 0));
 }
 
 function getSearchableText(message) {
@@ -202,7 +200,7 @@ async function loadPendingMessages() {
 
         const messages = await response.json();
         allPendingMessages = Array.isArray(messages)
-            ? buildPendingMessages(messages.filter((message) => isPendingMessage(message) || !isClientMessage(message)))
+            ? buildPendingMessages(messages.filter((message) => message && (isClientMessage(message) || !isClientMessage(message))))
             : [];
 
         applyPendingSearch();
