@@ -43,11 +43,7 @@ function formatDate(dateValue) {
     return date.toLocaleString('fr-FR');
 }
 
-function isPendingMessage(message) {
-    if (!message) return false;
-
-    const direction = String(message.direction ?? '').toLowerCase();
-    const sendMode = String(message.send_mode ?? '').toLowerCase();
+function getClientKey(message) {
     const clientId =
         message.client_id ??
         message.clientId ??
@@ -59,8 +55,82 @@ function isPendingMessage(message) {
         message.user?.id ??
         null;
 
-    const isClientMessage = direction === 'received' || sendMode === 'reponse';
-    return isClientMessage && Boolean(clientId);
+    if (clientId) return `client:${clientId}`;
+
+    const fallback =
+        message.client_phone ??
+        message.clientPhone ??
+        message.phone ??
+        message.client?.phone ??
+        message.user?.phone ??
+        getClientName(message) ??
+        '';
+
+    const normalizedFallback = String(fallback).trim().toLowerCase();
+    return normalizedFallback ? `fallback:${normalizedFallback}` : '';
+}
+
+function isClientMessage(message) {
+    if (!message) return false;
+
+    const direction = String(message.direction ?? '').toLowerCase();
+    const sendMode = String(message.send_mode ?? '').toLowerCase();
+    return direction === 'received' || sendMode === 'reponse';
+}
+
+function isPendingMessage(message) {
+    if (!message) return false;
+    return isClientMessage(message) && Boolean(getClientKey(message));
+}
+
+function buildPendingMessages(messages) {
+    const byClient = new Map();
+
+    messages.forEach((message) => {
+        if (!message) return;
+
+        const clientKey = getClientKey(message);
+        if (!clientKey || clientKey === 'fallback:') return;
+
+        if (!byClient.has(clientKey)) {
+            byClient.set(clientKey, {
+                clientName: getClientName(message),
+                latestClientMessage: null,
+                latestClientDate: null,
+                latestOutboundDate: null
+            });
+        }
+
+        const bucket = byClient.get(clientKey);
+        const timestamp = new Date(message.date_envoie || 0).getTime();
+
+        if (isClientMessage(message)) {
+            if (!bucket.latestClientMessage || timestamp > new Date(bucket.latestClientMessage.date_envoie || 0).getTime()) {
+                bucket.latestClientMessage = message;
+                bucket.latestClientDate = timestamp;
+            }
+            return;
+        }
+
+        if (timestamp > (bucket.latestOutboundDate ?? -Infinity)) {
+            bucket.latestOutboundDate = timestamp;
+        }
+    });
+
+    const pending = [];
+
+    byClient.forEach((bucket) => {
+        if (!bucket.latestClientMessage) return;
+
+        const latestClientDate = bucket.latestClientDate ?? 0;
+        const latestOutboundDate = bucket.latestOutboundDate ?? null;
+
+        if (!latestOutboundDate || latestOutboundDate < latestClientDate) {
+            pending.push(bucket.latestClientMessage);
+        }
+    });
+
+    return pending.sort((a, b) => new Date(b.date_envoie) - new Date(a.date_envoie));
 }
 
 function getSearchableText(message) {
@@ -132,7 +202,7 @@ async function loadPendingMessages() {
 
         const messages = await response.json();
         allPendingMessages = Array.isArray(messages)
-            ? messages.filter(isPendingMessage)
+            ? buildPendingMessages(messages.filter((message) => isPendingMessage(message) || !isClientMessage(message)))
             : [];
 
         applyPendingSearch();
