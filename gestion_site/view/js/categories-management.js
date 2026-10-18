@@ -44,9 +44,23 @@ function formatDate(dateValue) {
 }
 
 function isPendingMessage(message) {
+    if (!message) return false;
+
     const direction = String(message.direction ?? '').toLowerCase();
     const sendMode = String(message.send_mode ?? '').toLowerCase();
-    return direction === 'received' || sendMode === 'reponse';
+    const clientId =
+        message.client_id ??
+        message.clientId ??
+        message.user_id ??
+        message.userId ??
+        message.sender_id ??
+        message.senderId ??
+        message.client?.id ??
+        message.user?.id ??
+        null;
+
+    const isClientMessage = direction === 'received' || sendMode === 'reponse';
+    return isClientMessage && Boolean(clientId);
 }
 
 function getSearchableText(message) {
